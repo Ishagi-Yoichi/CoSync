@@ -1,8 +1,16 @@
+"use client"
+"use client";
 import { Cover } from "./Cover";
-
 import { CodeBlock } from "@/components/code-block";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
+    const router = useRouter();
+    
+    const handleCreateRoom = () => {
+        router.push('/home');
+    };
+    
     return (
         <section className="flex flex-col items-center justify-center min-h-[60vh] text-white font-bold text-4xl px-4 text-center mt-24">
             <h1 className="py-4">
@@ -15,7 +23,7 @@ export default function Hero() {
                 Collaborate in real-time with your team. Share code, ideas, and more—all in one place.
                 </p>
             <div className="flex-row mx-auto space-x-14 mt-10">
-                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-xl">Create Room</button>
+                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-xl" onClick={handleCreateRoom}>Create Room</button>
                 <button className="bg-blue-400 p-2.5 text-black cursor-pointer rounded-2xl font-medium text-xl">Watch Demo</button>
             </div>
             <div className="py-7">

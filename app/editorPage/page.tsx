@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { ACTIONS } from '../../Actions';
+const { ACTIONS } = require('../../Actions');
 import Client from '../../components/Client';
 import Editor from '../../components/Editor';
 import { initSocket } from '../../socket';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Socket } from "socket.io-client";
+
 
 type ClientType = {
     socketId: string;
@@ -23,25 +24,30 @@ const EditorPage = () => {
     const [clients, setClients] = useState<ClientType[]>([]);
 
     useEffect(() => {
+        let isInitialized = false;
+        
         const init = async () => {
-            socketRef.current = await initSocket();
-            socketRef.current.on('connect_error', (err: unknown) => handleErrors(err));
-            socketRef.current.on('connect_failed', (err: unknown) => handleErrors(err));
+            if (isInitialized) return;
+            isInitialized = true;
+            
+            try {
+                socketRef.current = await initSocket();
+                
+                const handleErrors = (e: unknown) => {
+                    console.log('socket error', e);
+                    toast.error('Socket connection failed, try again later.');
+                    router.push('/');
+                };
 
-            function handleErrors(e: unknown) {
-                console.log('socket error', e);
-                toast.error('Socket connection failed, try again later.');
-                router.push('/');
-            }
+                socketRef.current.on('connect_error', handleErrors);
+                socketRef.current.on('connect_failed', handleErrors);
 
-            socketRef.current.emit(ACTIONS.JOIN, {
-                roomId,
-                username,
-            });
+                socketRef.current.emit(ACTIONS.JOIN, {
+                    roomId,
+                    username,
+                });
 
-            socketRef.current.on(
-                ACTIONS.JOINED,
-                ({ clients, username: joinedUsername, socketId }: { clients: ClientType[]; username: string; socketId: string }) => {
+                const handleJoined = ({ clients, username: joinedUsername, socketId }: { clients: ClientType[]; username: string; socketId: string }) => {
                     if (joinedUsername !== username) {
                         toast.success(`${joinedUsername} joined the room.`);
                         console.log(`${joinedUsername} joined`);
@@ -51,23 +57,38 @@ const EditorPage = () => {
                         code: codeRef.current,
                         socketId,
                     });
-                }
-            );
+                };
 
-            socketRef.current.on(
-                ACTIONS.DISCONNECTED,
-                ({ socketId, username: leftUsername }: { socketId: string; username: string }) => {
+                const handleDisconnected = ({ socketId, username: leftUsername }: { socketId: string; username: string }) => {
                     toast.success(`${leftUsername} left the room.`);
                     setClients((prev) => prev.filter((client) => client.socketId !== socketId));
-                }
-            );
+                };
+
+                socketRef.current.on(ACTIONS.JOINED, handleJoined);
+                socketRef.current.on(ACTIONS.DISCONNECTED, handleDisconnected);
+
+                // Store cleanup functions
+                return () => {
+                    if (socketRef.current) {
+                        socketRef.current.off('connect_error', handleErrors);
+                        socketRef.current.off('connect_failed', handleErrors);
+                        socketRef.current.off(ACTIONS.JOINED, handleJoined);
+                        socketRef.current.off(ACTIONS.DISCONNECTED, handleDisconnected);
+                        socketRef.current.disconnect();
+                    }
+                };
+            } catch (error) {
+                console.error('Failed to initialize socket:', error);
+                toast.error('Failed to connect to server');
+                router.push('/');
+            }
         };
-        init();
+
+        const cleanup = init();
+        
         return () => {
-            socketRef.current?.disconnect();
-            socketRef.current?.off(ACTIONS.JOINED);
-            socketRef.current?.off(ACTIONS.DISCONNECTED);
-        }
+            cleanup.then(cleanupFn => cleanupFn?.());
+        };
     }, [roomId, username, router]);
 
     async function copyRoomId() {
@@ -90,18 +111,16 @@ const EditorPage = () => {
     }
 
     return (
-        <div className="mainWrap">
-            <div className="aside">
-                <div className="asideInner">
-                    <div className="logo">
-                        <img
-                            className="logoImage"
-                            src="/image.png"
-                            alt="logo"
-                        />
+        <div className="flex h-screen bg-gray-900">
+            <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col p-5">
+                <div className="flex-1">
+                    <div className="mb-5 text-center">
+                        <div className="w-16 h-16 mx-auto bg-blue-600 rounded-lg flex items-center justify-center">
+                            <span className="text-2xl font-bold text-white">CoSync</span>
+                        </div>
                     </div>
-                    <h3>Connected</h3>
-                    <div className="clientsList">
+                    <h3 className="text-white mb-4 text-lg font-semibold">Connected</h3>
+                    <div className="space-y-2">
                         {clients.map((client) => (
                             <Client
                                 key={client.socketId}
@@ -110,14 +129,20 @@ const EditorPage = () => {
                         ))}
                     </div>
                 </div>
-                <button className="btn copyBtn" onClick={copyRoomId}>
+                <button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors mb-3"
+                    onClick={copyRoomId}
+                >
                     Copy ROOM ID
                 </button>
-                <button className="btn leaveBtn" onClick={leaveRoom}>
+                <button 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                    onClick={leaveRoom}
+                >
                     Leave
                 </button>
             </div>
-            <div className="editorWrap">
+            <div className="flex-1 flex flex-col h-full">
                 <Editor
                     socketRef={socketRef}
                     roomId={roomId}

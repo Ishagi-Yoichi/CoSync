@@ -32,19 +32,43 @@ const Home = () => {
     };
 
     return (
-        <div className='bg-white w-44 h-56 rounded-lg'>
-            <h4>Paste invitation Room ID</h4>
+    <div className='flex flex-col items-center justify-center h-screen '>
+        <div className='bg-white w-96 h-auto rounded-lg justify-center items-center'>
+            <h4 className='text-center font-bold'>Paste invitation Room ID</h4>
             <input
              type ="text"
-             className='p-10 border-2 border-gray-300 rounded-lg w-full mb-4 text-white'
+             className=' border-2 border-black rounded-lg w-72 mb-4 text-black font-bold'
              placeholder='Room ID'
              onChange={(e) => setRoomId(e.target.value)}
                 value={roomId}
                 onKeyUp={handleInputEnter}
-             >
-
-             </input>
+             />
+             
+            <input
+                type="text"
+                className="border-2 border-black rounded-lg w-72 mb-4 text-black font-bold"
+                placeholder="USERNAME"
+                onChange={(e) => setUsername(e.target.value)}
+                value={username}
+                 onKeyUp={handleInputEnter}
+            />
+            <br />
+            <button className="bg-blue-500 rounded-lg p-2 cursor-pointer hover:bg-blue-600 text-black font-bold" onClick={joinRoom}>
+                Join
+            </button>
+            <br />
+             <span className="createInfo">
+                        If you don`t have an invite then create &nbsp; <br /><br />
+                        <a
+                            onClick={createNewRoom}
+                            href=""
+                            className="bg-green-400 border-b-green-600 border-solid transition-all duration-300 ease-in-out hover:bg-green-500 rounded-lg p-2 cursor-pointer hover:border-b-2 text-black font-bold"
+                        >
+                            new room
+                        </a>
+            </span>
         </div>
+    </div>
     )
 };
 

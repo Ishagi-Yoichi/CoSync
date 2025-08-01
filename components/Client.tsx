@@ -7,9 +7,9 @@ interface ClientType{
 
 export default function Client({username}:ClientType){
     return(
-        <div className='client'>
-            <Avatar name={username} size="50" round="14px"/>
-            <span className='userName'>{username}</span>
+        <div className='flex items-center gap-3 p-2 bg-gray-700 rounded-lg'>
+            <Avatar name={username} size="40" round="8px"/>
+            <span className='text-white text-sm font-medium'>{username}</span>
         </div>
     )
 }
