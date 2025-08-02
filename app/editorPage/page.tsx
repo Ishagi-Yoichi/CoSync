@@ -24,6 +24,9 @@ const EditorPage = () => {
     const [clients, setClients] = useState<ClientType[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
+       // Add this somewhere in your component to test
+   
+
     useEffect(() => {
         let isInitialized = false;
         
@@ -37,6 +40,7 @@ const EditorPage = () => {
                 const handleErrors = (e: unknown) => {
                     console.log('socket error', e);
                     toast.error('Socket connection failed, trying to reconnect...');
+                    router.push('/');
                 };
 
                 const handleDisconnect = (reason: string) => {
