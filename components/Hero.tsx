@@ -3,6 +3,40 @@
 import { Cover } from "./Cover";
 import { CodeBlock } from "@/components/code-block";
 import { useRouter } from "next/navigation";
+import { HoverEffect } from "./card-hover-effect";
+
+export const projects = [
+    {
+        title: "Real Time Collabaration",
+        description: "See every keystroke as it happens. Multiple cursors, live editing, and instant synchronization across all participants.",
+        link: "https://www.google.com"
+    },
+    {
+        title: "Easy Room Creation",
+        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
+        link: "https://www.google.com"
+    },
+    {
+        title: "Easy Room Creation",
+        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
+        link: "https://www.google.com"
+    },
+    {
+        title: "Easy Room Creation",
+        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
+        link: "https://www.google.com"
+    },
+    {
+        title: "Easy Room Creation",
+        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
+        link: "https://www.google.com"
+    },
+    {
+        title: "Easy Room Creation",
+        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
+        link: "https://www.google.com"
+    }
+]
 
 export default function Hero() {
     const router = useRouter();
@@ -12,6 +46,7 @@ export default function Hero() {
     };
     
     return (
+        <div>
         <section className="flex flex-col items-center justify-center min-h-[60vh] text-white font-bold text-4xl px-4 text-center mt-24">
             <h1 className="py-4">
                 <span className="text-blue-400">{'{ '}</span>
@@ -53,22 +88,20 @@ export default function Hero() {
                         `}
                         />
              </div>
-            <div className="text-4xl text-white font-bold">
-                        Why CodeSync?
-            </div>
-            <section className="flex justify-around mx-4 ">
-             <div className="bg-white border border-gray-300 rounded-lg shadow-md p-4 justify-around w-auto">
-                <h2 className="text-xl font-bold mb-2">Real Time Collabaration</h2>
-                <p className="text-gray-700">See every keystroke as it happens. Multiple cursors, live editing, and instant synchronization across all participants.</p>
-             </div>
+              <h2 className="text-3xl font-bold text-center text-white relative w-fit mx-auto mt-10">
+                  Why CodeSync?
+                <span className="absolute left-0 -bottom-1 h-[2.5px] w-full bg-blue-500 rounded-full shadow-[0_0_15px_5px_rgba(59,130,246,0.5)] animate-ping"></span>
+               </h2> 
 
-             <div className="bg-white border border-gray-300 rounded-lg shadow-md p-4 justify-around w-auto">
-                <h2 className="text-xl font-bold mb-2">Easy Room Creation</h2>
-                <p className="text-gray-700">See every keystroke as it happens. Multiple cursors, live editing, and instant synchronization across all participants.</p>
-             </div>
 
-            </section>
+            
+            
         </section>
+        <div className="mt-4">
+            <HoverEffect items={projects}/>
+        </div>
+        </div>
+       
 
     );
 }
