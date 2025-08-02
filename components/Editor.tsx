@@ -70,7 +70,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }: EditorProps) => {
                 socketRef.current?.off(ACTIONS.CODE_CHANGE, handler);
             };
         }
-    }, [socketRef.current]);
+    }, [socketRef.current?.connected]);
     
     return (
         <div className="h-full w-full">

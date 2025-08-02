@@ -1,24 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CoSync - Real-time Collaborative Code Editor
+
+A real-time collaborative code editor built with Next.js and Socket.IO that allows multiple users to edit code simultaneously.
+
+## Features
+
+- Real-time collaborative editing
+- Live cursor tracking
+- Room-based collaboration
+- Automatic reconnection handling
+- Connection status indicators
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Start the development environment:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Option 1: Use the provided scripts**
+```bash
+# Windows (PowerShell)
+.\start-dev.ps1
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Windows (Command Prompt)
+start-dev.bat
+```
+
+**Option 2: Manual start**
+```bash
+# Terminal 1 - Start the Socket.IO server
+npm run server
+
+# Terminal 2 - Start the Next.js client
+npm run dev
+```
+
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Troubleshooting Connection Issues
+
+If you experience room disconnections or connection issues:
+
+1. **Ensure both server and client are running**
+   - Server should be on port 5000
+   - Client should be on port 3000
+
+2. **Check firewall settings**
+   - Make sure ports 3000 and 5000 are not blocked
+
+3. **Clear browser cache**
+   - Hard refresh (Ctrl+F5) or clear browser cache
+
+4. **Check network connectivity**
+   - Ensure stable internet connection
+   - Try disabling VPN if using one
+
+5. **Use the Reconnect button**
+   - If disconnected, use the yellow "Reconnect" button in the sidebar
+
+6. **Monitor connection status**
+   - Green dot = Connected
+   - Red dot = Disconnected
+
+## Development
+
+The project uses:
+- [Next.js](https://nextjs.org) for the frontend
+- [Socket.IO](https://socket.io) for real-time communication
+- [CodeMirror](https://codemirror.net) for the code editor
+- [Tailwind CSS](https://tailwindcss.com) for styling
 
 ## Learn More
 
