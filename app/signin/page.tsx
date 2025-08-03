@@ -1,5 +1,11 @@
 import { Geist } from 'next/font/google';
 const geist = Geist({ subsets: ['latin'] });
+const res = await fetch('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(FormData),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  
 export default function Signin() {
     return <div className="h-screen flex justify-center flex-col">
         <div className="flex justify-center">
