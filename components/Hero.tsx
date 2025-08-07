@@ -48,7 +48,7 @@ export default function Hero() {
     return (
         <div>
         <section className="flex flex-col items-center justify-center min-h-[60vh] text-white font-bold text-4xl px-4 text-center mt-24">
-            <h1 className="py-4">
+            <h1 className="py-4 text-5xl">
                 <span className="text-blue-400">{'{ '}</span>
                 Code
                 <span className="text-blue-400">{' }'}</span>
@@ -58,8 +58,8 @@ export default function Hero() {
                 Collaborate in real-time with your team. Share code, ideas, and more—all in one place.
                 </p>
             <div className="flex-row mx-auto space-x-14 mt-10">
-                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-xl" onClick={handleCreateRoom}>Create Room</button>
-                <button className="bg-blue-400 p-2.5 text-black cursor-pointer rounded-2xl font-medium text-xl">Watch Demo</button>
+                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-amber-500" onClick={handleCreateRoom}>Create Room</button>
+                <button className="bg-blue-400 p-2.5 text-black cursor-pointer rounded-2xl font-medium text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg">Watch Demo</button>
             </div>
             <div className="py-7">
                     <CodeBlock

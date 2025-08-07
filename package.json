@@ -2,7 +2,6 @@
   "name": "cosync",
   "version": "0.1.0",
   "private": true,
-  
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -36,7 +35,7 @@
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "uuid": "^11.1.0",
-    "zod": "^4.0.14"
+    "zod": "^4.0.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -52,15 +51,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5"
   },
-  
- 
   "prisma": {
-  "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
+  }
 }
-
-}
-
-
-
-
-

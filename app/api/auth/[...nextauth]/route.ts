@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         email:{
           label:'Email',
           type:'email',
-          IconPlaceholder:'nik@gmail.com'
+          placeholder:'nik@gmail.com'
         },
         password:{label:'Password',type:'password'}
       },
@@ -48,6 +48,23 @@ export const authOptions: NextAuthOptions = {
       }
     }),
   ],
+  callbacks:{
+    session: ({session,token}) => {
+      console.log('Session Callback',{session,token})
+      return session
+    },
+    jwt:({token,user}) => {
+      console.log('JWT Callback',{token,user})
+      if(user){
+        const u = user as unknown as any
+        return {
+          ...token,
+          id: u.id
+        }
+      }
+      return token
+    }
+  }
 }
 const handler = NextAuth(authOptions)
 export {handler as GET, handler as POST}
