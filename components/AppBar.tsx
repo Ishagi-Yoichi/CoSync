@@ -6,7 +6,7 @@ export default function AppBar() {
         </div>
         <div className="flex space-x-4 ">
             <a href='' className="text-white hover:text-blue-400" >Features</a>
-            <a href='#' className="text-white hover:text-blue-400">Pricing </a>
+            <a href="/pricing" className="text-white hover:text-blue-400 transition">Pricing</a>
             <a href='%' className="text-white hover:text-blue-400">About</a>
         </div>
 

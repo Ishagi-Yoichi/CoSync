@@ -92,10 +92,6 @@ export default function Hero() {
                   Why CodeSync?
                 <span className="absolute left-0 -bottom-1 h-[2.5px] w-full bg-blue-500 rounded-full shadow-[0_0_15px_5px_rgba(59,130,246,0.5)] animate-ping"></span>
                </h2> 
-
-
-            
-            
         </section>
         <div className="mt-4">
             <HoverEffect items={projects}/>
