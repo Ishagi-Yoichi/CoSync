@@ -1,3 +1,5 @@
+import LogoutButton from "./Logout";
+
 export default function AppBar() {
     return (
     <div className="bg-black border border-white  p-4 flex justify-between items-center mt-7 rounded-3xl mx-auto w-3xl">
@@ -8,6 +10,7 @@ export default function AppBar() {
             <a href='' className="text-white hover:text-blue-400" >Features</a>
             <a href="/pricing" className="text-white hover:text-blue-400 transition">Pricing</a>
             <a href='%' className="text-white hover:text-blue-400">About</a>
+            <LogoutButton></LogoutButton>
         </div>
 
     </div>);
