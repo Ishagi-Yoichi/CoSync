@@ -4,19 +4,19 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
-// 1. Zod schema for validation
+// Zod schema for validation
 const SignupSchema = z.object({
   name: z.string().min(2, 'Name too short'),
   email: z.string().email(),
   password: z.string().min(6, 'Password too short'),
 });
 
-// 2. POST handler
+//post handler
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validate input
+    //validate input
     const parsed = SignupSchema.safeParse(body);
     if (!parsed.success) {
       const errorMsg = parsed.error.issues.map((e:any) => e.message).join(', ');
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     const { name, email, password } = parsed.data;
 
-    // Check if user already exists
+  
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
