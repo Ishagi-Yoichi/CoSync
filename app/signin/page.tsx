@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const SearchParams = useSearchParams();
+  const callbackUrl = SearchParams.get("callbackUrl") || "/home"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,12 +20,13 @@ export default function SignInPage() {
       redirect: false, // handle redirect manually
       email,
       password,
+      callbackUrl,
     });
 
     if (res?.error) {
       setError(res.error);
     } else {
-      router.push('/'); // redirect to home/dashboard
+      router.push(res?.url || callbackUrl || '/'); // redirect to home/dashboard
     }
   }
 

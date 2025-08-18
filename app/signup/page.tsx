@@ -1,7 +1,7 @@
 'use client';
 
 import { Geist } from 'next/font/google';
-import { useRouter } from 'next/navigation';
+import { useRouter,useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const geist = Geist({ subsets: ['latin'] });
@@ -13,6 +13,8 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/home";
 
   async function handleSubmit() {
     const res = await fetch('/api/auth/signup', {
@@ -26,7 +28,7 @@ export default function SignUp() {
     if (!res.ok) {
       setError(data.message || 'Something went wrong');
     } else {
-      router.push("/signin");
+      router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   }
 

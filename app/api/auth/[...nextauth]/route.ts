@@ -66,6 +66,15 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return token
+    },
+    async redirect({url,baseUrl}){
+      console.log("Redirected url",{url,baseUrl});
+      if(url.startsWith("/")) return `${baseUrl}${url}`;
+      //same-origin absolute url, allow it
+      if(new URL(url).origin === baseUrl) return url;
+
+      //fallback- always send to homepage
+      return baseUrl;
     }
   }
 }
