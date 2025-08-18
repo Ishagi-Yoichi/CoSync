@@ -1,11 +1,13 @@
 'use client';
 
 import { Geist } from 'next/font/google';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const geist = Geist({ subsets: ['latin'] });
 
 export default function SignUp() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,11 +26,7 @@ export default function SignUp() {
     if (!res.ok) {
       setError(data.message || 'Something went wrong');
     } else {
-      setError('');
-      setSuccess('User created successfully! Now you can sign in.');
-      setName('');
-      setEmail('');
-      setPassword('');
+      router.push("/signin");
     }
   }
 
