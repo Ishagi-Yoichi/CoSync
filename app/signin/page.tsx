@@ -35,6 +35,7 @@ export default function SignInPage() {
           type="email"
           placeholder="Email"
           value={email}
+          className='text-white border border-b-white'
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -43,11 +44,12 @@ export default function SignInPage() {
           type="password"
           placeholder="Password"
           value={password}
+          className='text-white'
           onChange={(e) => setPassword(e.target.value)}
           required
         />
         <br />
-        <button type="submit">Sign In</button>
+        <button type="submit" className='bg-blue-600'>Sign In</button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}

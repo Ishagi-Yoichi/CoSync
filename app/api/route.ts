@@ -1,23 +1,16 @@
-// api/route.ts
+// app/api/route.ts
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "./auth/[...nextauth]/route";
 
 export async function GET(request: Request) {
-  const { pathname } = new URL(request.url);
-
-  // ✅ If request is to "/", skip auth
-  if (pathname === "/") {
-    return NextResponse.json({ authenticated: false });
-  }
-
   const session = await getServerSession(authOptions);
 
+  // If not authenticated, return 401
   if (!session) {
-    return new NextResponse(JSON.stringify({ error: "unauthorized" }), {
-      status: 401,
-    });
+    return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
+  // If authenticated, return user info
   return NextResponse.json({ authenticated: true, user: session.user });
 }
