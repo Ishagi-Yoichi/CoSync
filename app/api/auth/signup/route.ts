@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client'; // adjust path if needed
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // Zod schema for validation
 const SignupSchema = z.object({

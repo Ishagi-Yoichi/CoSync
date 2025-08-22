@@ -1,4 +1,5 @@
 'use client';
+import { prisma } from "@/lib/prisma";
 
 import { Geist } from 'next/font/google';
 import { useRouter,useSearchParams } from 'next/navigation';
