@@ -24,18 +24,15 @@ const EditorPage = () => {
     const [clients, setClients] = useState<ClientType[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
-       // Add this somewhere in your component to test
+      
    
 
     useEffect(() => {
-        let isInitialized = false;
-        
-        const init = async () => {
-            if (isInitialized) return;
-            isInitialized = true;
-            
-            try {
-                socketRef.current = await initSocket();
+        if(typeof window === "undefined") return;
+        let isMounted = true;
+        const socket = initSocket();
+        if(!socket) return;
+        socketRef.current = socket;
                 
                 const handleErrors = (e: unknown) => {
                     console.log('socket error', e);
@@ -48,7 +45,7 @@ const EditorPage = () => {
                     setIsConnected(false);
                     if (reason === 'io server disconnect') {
                         // the disconnection was initiated by the server, you need to reconnect manually
-                        socketRef.current?.connect();
+                       socket.connect();
                     }
                     toast.error('Connection lost, attempting to reconnect...');
                 };
@@ -63,25 +60,25 @@ const EditorPage = () => {
                     setIsConnected(true);
                     toast.success('Reconnected to server!');
                     // Re-join the room after reconnection
-                    socketRef.current?.emit(ACTIONS.JOIN, {
+                    socket.emit(ACTIONS.JOIN, {
                         roomId,
                         username,
                     });
                 };
-
-                socketRef.current.on('connect', handleConnect);
-                socketRef.current.on('connect_error', handleErrors);
-                socketRef.current.on('connect_failed', handleErrors);
-                socketRef.current.on('disconnect', handleDisconnect);
-                socketRef.current.on('reconnect', handleReconnect);
+                    //Register listneres
+                socket.on('connect', handleConnect);
+                socket.on('connect_error', handleErrors);
+                socket.on('connect_failed', handleErrors);
+                socket.on('disconnect', handleDisconnect);
+                socket.on('reconnect', handleReconnect);
                 
                 // Handle ping/pong for connection health
-                socketRef.current.on('ping', () => {
-                    socketRef.current?.emit('pong');
+                socket.on('ping', () => {
+                    socket?.emit('pong');
                 });
 
                 console.log('Joining room:', { roomId, username });
-                socketRef.current.emit(ACTIONS.JOIN, {
+                socket.emit(ACTIONS.JOIN, {
                     roomId,
                     username,
                 });
@@ -102,7 +99,7 @@ const EditorPage = () => {
                     
                     // Sync code with the new user
                     if (codeRef.current) {
-                        socketRef.current?.emit(ACTIONS.SYNC_CODE, {
+                        socket?.emit(ACTIONS.SYNC_CODE, {
                             code: codeRef.current,
                             socketId,
                         });
@@ -114,40 +111,23 @@ const EditorPage = () => {
                     setClients((prev) => prev.filter((client) => client.socketId !== socketId));
                 };
 
-                socketRef.current.on(ACTIONS.JOINED, handleJoined);
-                socketRef.current.on(ACTIONS.DISCONNECTED, handleDisconnected);
+                socket.on(ACTIONS.JOINED, handleJoined);
+                socket.on(ACTIONS.DISCONNECTED, handleDisconnected);
 
                 // Store cleanup functions
                 return () => {
-                    if (socketRef.current) {
-                        socketRef.current.off('connect', handleConnect);
-                        socketRef.current.off('connect_error', handleErrors);
-                        socketRef.current.off('connect_failed', handleErrors);
-                        socketRef.current.off('disconnect', handleDisconnect);
-                        socketRef.current.off('reconnect', handleReconnect);
-                        socketRef.current.off('ping');
-                        socketRef.current.off(ACTIONS.JOINED, handleJoined);
-                        socketRef.current.off(ACTIONS.DISCONNECTED, handleDisconnected);
-                        socketRef.current.disconnect();
+                    if (socket) {
+                        socket.off('connect', handleConnect);
+                        socket.off('connect_error', handleErrors);
+                        socket.off('connect_failed', handleErrors);
+                        socket.off('disconnect', handleDisconnect);
+                        socket.off('reconnect', handleReconnect);
+                        socket.off('ping');
+                        socket.off(ACTIONS.JOINED, handleJoined);
+                        socket.off(ACTIONS.DISCONNECTED, handleDisconnected);
+                        socket.disconnect();
                     }
                 };
-            } catch (error) {
-                console.error('Failed to initialize socket:', error);
-                toast.error('Failed to connect to server. Please check if the server is running.');
-                // Don't redirect immediately, let the user try to reconnect
-                setTimeout(() => {
-                    if (!socketRef.current?.connected) {
-                        router.push('/');
-                    }
-                }, 5000);
-            }
-        };
-
-        const cleanup = init();
-        
-        return () => {
-            cleanup.then(cleanupFn => cleanupFn?.());
-        };
     }, [roomId, username, router]);
 
     async function copyRoomId() {
@@ -163,6 +143,7 @@ const EditorPage = () => {
     function leaveRoom() {
         router.push('/');
     }
+    
 
     function reconnect() {
         if (socketRef.current) {

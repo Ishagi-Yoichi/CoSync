@@ -1,8 +1,11 @@
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
-export const initSocket = async () => {
+let socket: Socket | null = null;
+
+export const initSocket = () => {
+    if(!socket){
     const options = {
-        'force new connection': true,
+        forceNew: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
@@ -11,8 +14,14 @@ export const initSocket = async () => {
         upgrade: true,
         rememberUpgrade: true,
     };
-    
-    // Use environment variable or default to localhost:5000
     const serverUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+   
+   if(typeof window !=="undefined"){
     return io(serverUrl, options);
+   }
+
+}
+    
+   return socket;
+    
 };
