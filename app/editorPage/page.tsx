@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 const { ACTIONS } = require('../../Actions');
