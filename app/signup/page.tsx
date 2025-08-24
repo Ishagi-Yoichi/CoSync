@@ -1,13 +1,13 @@
 'use client';
 import { prisma } from "@/lib/prisma";
-
+import { Suspense } from "react";
 import { Geist } from 'next/font/google';
 import { useRouter,useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const geist = Geist({ subsets: ['latin'] });
 
-export default function SignUp() {
+export  function SignUpForm() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -85,5 +85,13 @@ export default function SignUp() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUp() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }
