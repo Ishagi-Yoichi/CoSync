@@ -1,7 +1,7 @@
 "use client";
 //export const dynamic = "force-dynamic";
 import dynamic from 'next/dynamic';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import toast from 'react-hot-toast';
 const { ACTIONS } = require('../../Actions');
 import Client from '../../components/Client';
@@ -18,7 +18,8 @@ type ClientType = {
     username: string;
 };
 
-const EditorPage = () => {
+// Component that uses useSearchParams - needs to be wrapped in Suspense
+const EditorPageContent = () => {
     const socketRef = useRef<Socket | null>(null);
     const codeRef = useRef<string | null>(null);
     const router = useRouter();
@@ -220,4 +221,21 @@ const EditorPage = () => {
         </div>
     );
 };
+
+// Loading component for Suspense fallback
+const EditorPageLoading = () => (
+    <div className="flex h-screen bg-gray-900 items-center justify-center">
+        <div className="text-white text-xl">Loading editor...</div>
+    </div>
+);
+
+// Main component with Suspense boundary
+const EditorPage = () => {
+    return (
+        <Suspense fallback={<EditorPageLoading />}>
+            <EditorPageContent />
+        </Suspense>
+    );
+};
+
 export default EditorPage;
