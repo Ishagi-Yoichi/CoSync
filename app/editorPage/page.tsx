@@ -1,14 +1,17 @@
 "use client";
-export const dynamic = "force-dynamic";
+//export const dynamic = "force-dynamic";
+import dynamic from 'next/dynamic';
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 const { ACTIONS } = require('../../Actions');
 import Client from '../../components/Client';
-import Editor from '../../components/Editor';
+
 import { initSocket } from '../../socket';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Socket } from "socket.io-client";
-
+const Editor = dynamic(() => import("../../components/Editor"), {
+    ssr: false, // 
+  });
 
 type ClientType = {
     socketId: string;
