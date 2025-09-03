@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "build:frontend": "next build",
+    "start:frontend": "next start",
+    "build:backend": "tsc",
+    "start:backend":"node dist/server.ts",
     "lint": "next lint --max-warnings=0",
-    "server": "ts-node server.ts",
-     "postinstall": "prisma generate"
-  
+    "server": "tsx server.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",
@@ -51,7 +52,8 @@
     "prisma": "^6.13.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
