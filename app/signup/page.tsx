@@ -34,8 +34,8 @@ export  function SignUpForm() {
   }
 
   return (
-    <div className="h-screen flex justify-center items-center bg-pink-50">
-      <div className="block max-w-sm p-6 bg-white border border-pink-200 rounded-2xl shadow">
+    <div className="h-screen flex justify-center items-center bg-black">
+      <div className="block max-w-sm p-6 bg-white border border-pink-600 border-solid rounded-2xl shadow">
         <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
           Sign Up
         </div>

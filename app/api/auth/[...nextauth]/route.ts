@@ -2,14 +2,21 @@ import { IconPlaceholder } from "@tabler/icons-react"
 import { compare } from "bcryptjs"
 import NextAuth, { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 import {prisma} from '@/lib/prisma'
 //const prisma = new PrismaClient()
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!
 
 export const authOptions: NextAuthOptions = {
   session:{
     strategy:'jwt'
   }, 
   providers: [
+    GoogleProvider({
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret:GOOGLE_CLIENT_SECRET
+    }),
     CredentialsProvider({
       name: 'Sign in',
       credentials:{
