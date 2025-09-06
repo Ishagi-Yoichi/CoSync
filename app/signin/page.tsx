@@ -72,6 +72,12 @@ export function SignInForm() {
           >
             Sign In
           </button>
+          <button
+            onClick={()=>signIn('google',{callbackUrl:'/'})}
+            className={`mt-4 w-full text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
+          >
+            Sign In with Google
+          </button>
         </form>
       </div>
     </div>

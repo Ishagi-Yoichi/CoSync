@@ -60,22 +60,21 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks:{
     session: ({session,token}) => {
-      console.log('Session Callback',{session,token})
+      //@ts-ignore
+      session.user.id = token.id as string;
       return session
     },
     jwt:({token,user}) => {
       console.log('JWT Callback',{token,user})
       if(user){
-        const u = user as unknown as any
         return {
           ...token,
-          id: u.id
+          id: (user as any).id
         }
       }
       return token
     },
     async redirect({url,baseUrl}){
-      console.log("Redirected url",{url,baseUrl});
       if(url.startsWith("/")) return `${baseUrl}${url}`;
       //same-origin absolute url, allow it
       if(new URL(url).origin === baseUrl) return url;
