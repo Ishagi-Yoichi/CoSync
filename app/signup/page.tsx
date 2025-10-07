@@ -35,7 +35,7 @@ export  function SignUpForm() {
 
   return (
     <div className="h-screen flex justify-center items-center bg-black">
-      <div className="block max-w-sm p-6 bg-white border border-pink-600 border-solid rounded-2xl shadow">
+      <div className="block max-w-sm p-6 bg-white border border-gray-200 border-solid rounded-2xl shadow">
         <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
           Sign Up
         </div>
@@ -78,7 +78,7 @@ export  function SignUpForm() {
           <button
             type="button"
             onClick={handleSubmit}
-            className={`mt-4 w-full text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
+            className={`mt-4 w-full text-white bg-gray-900 hover:bg-gray-800 focus:ring-4 focus:ring-gray-600 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
           >
             Sign Up
           </button>

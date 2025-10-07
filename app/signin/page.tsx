@@ -1,4 +1,6 @@
 'use client';
+import google_png  from "@/assets/icons8-google-logo-48.png";
+import Image from 'next/image';
 import { Suspense } from "react";
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
@@ -34,8 +36,8 @@ export function SignInForm() {
 
   return (
     
-    <div className="h-screen flex justify-center items-center bg-pink-50">
-      <div className="block max-w-sm p-6 bg-white border border-pink-200 rounded-2xl shadow">
+    <div className="h-screen flex justify-center items-center bg-black">
+      <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-2xl shadow">
         <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
           Sign In
         </div>
@@ -68,16 +70,20 @@ export function SignInForm() {
 
           <button
             type="submit"
-            className={`mt-4 w-full text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
+            className={`mt-4 w-full text-white bg-gray-900 hover:bg-gray-800 focus:ring-4 focus:ring-gray-600 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
           >
             Sign In
           </button>
           <button
             onClick={()=>signIn('google',{callbackUrl:'/'})}
-            className={`mt-4 w-full text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
+            className={`mt-4 w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
           >
-            Sign In with Google
+            <span className="inline-flex items-center justify-center gap-2">
+              <span>Sign In with</span>
+              <Image src={google_png} alt="Google" width={28} height={28} />
+            </span>
           </button>
+          <h1>Don't have an account?</h1>
         </form>
       </div>
     </div>

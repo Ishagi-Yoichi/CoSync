@@ -28,6 +28,7 @@ const EditorPageContent = () => {
     const username = searchParams.get('username') ?? '';
     const [clients, setClients] = useState<ClientType[]>([]);
     const [isConnected, setIsConnected] = useState(false);
+    const[writes,setWrite] = useState(true);
 
       
    
@@ -109,10 +110,13 @@ const EditorPageContent = () => {
                             socketId,
                         });
                     }
+                    //only client with setWrite(true) can write
+                     
+
                 };
 
                 const handleDisconnected = ({ socketId, username: leftUsername }: { socketId: string; username: string }) => {
-                    toast.success(`${leftUsername} left the room.`);
+                    toast.success(`${leftUsername} left the room :(`);
                     setClients((prev) => prev.filter((client) => client.socketId !== socketId));
                 };
 

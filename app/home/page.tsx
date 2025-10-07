@@ -79,7 +79,7 @@ const Home = () => {
                             onClick={createNewRoom}
                             className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
                         >
-                            Create New Room
+                            Create Room ID
                         </button>
                     </div>
                 </div>
