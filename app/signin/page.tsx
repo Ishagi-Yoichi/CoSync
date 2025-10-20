@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Geist } from 'next/font/google';
+import Link from 'next/link';
 const geist = Geist({ subsets: ['latin'] });
 
 export function SignInForm() {
@@ -83,7 +84,9 @@ export function SignInForm() {
               <Image src={google_png} alt="Google" width={28} height={28} />
             </span>
           </button>
-          <h1>Don't have an account? Signup Now</h1>
+          <h1 className="text-center text-sm text-gray-600 mt-4">
+            Don't have an account? <Link href="/signup" className="text-blue-600 hover:text-blue-800 underline">SignUp Now</Link>
+          </h1>
         </form>
       </div>
     </div>
