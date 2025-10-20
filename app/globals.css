@@ -3,6 +3,14 @@
 body {
   margin: 0;
   background: black;
+  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+}
+
+/* Mobile-first responsive improvements */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
 }
 
 /* CodeMirror full height styles */
@@ -14,5 +22,36 @@ body {
 #realtimeEditor {
   height: 100% !important;
   min-height: 100% !important;
+}
+
+/* Mobile-specific code block improvements */
+@media (max-width: 640px) {
+  .CodeMirror {
+    font-size: 12px !important;
+  }
+  
+  .CodeMirror-lines {
+    padding: 8px 4px !important;
+  }
+  
+  .CodeMirror-gutters {
+    padding-right: 4px !important;
+  }
+}
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus for mobile */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 

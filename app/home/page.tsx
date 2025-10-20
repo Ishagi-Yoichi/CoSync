@@ -33,10 +33,10 @@ const Home = () => {
 
     return (
         <DotBackgroundDemo>
-            <div className='flex flex-col items-center justify-center h-screen'>
-                <div className='bg-white/95 backdrop-blur-sm w-96 h-auto rounded-2xl shadow-2xl border border-white/20 p-8'>
-                    <div className='text-center mb-8'>
-                        <h2 className='text-2xl font-bold text-gray-800 mb-2'>Join a Room</h2>
+            <div className='flex flex-col items-center justify-center min-h-screen p-4'>
+                <div className='bg-white/95 backdrop-blur-sm w-full max-w-md sm:max-w-lg h-auto rounded-2xl shadow-2xl border border-white/20 p-6 sm:p-8'>
+                    <div className='text-center mb-6 sm:mb-8'>
+                        <h2 className='text-xl sm:text-2xl font-bold text-gray-800 mb-2'>Join a Room</h2>
                         <p className='text-gray-600 text-sm'>Enter your room ID and username to get started</p>
                     </div>
                     

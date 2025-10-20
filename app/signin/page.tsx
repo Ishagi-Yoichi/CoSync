@@ -83,7 +83,7 @@ export function SignInForm() {
               <Image src={google_png} alt="Google" width={28} height={28} />
             </span>
           </button>
-          <h1>Don't have an account?</h1>
+          <h1>Don't have an account? Signup Now</h1>
         </form>
       </div>
     </div>

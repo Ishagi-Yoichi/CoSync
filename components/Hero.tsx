@@ -9,32 +9,22 @@ export const projects = [
     {
         title: "Real Time Collabaration",
         description: "See every keystroke as it happens. Multiple cursors, live editing, and instant synchronization across all participants.",
-        link: "https://www.google.com"
+        link: "#features"
     },
     {
         title: "Easy Room Creation",
         description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
-        link: "https://www.google.com"
+        link: "#features"
     },
     {
-        title: "Easy Room Creation",
-        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
-        link: "https://www.google.com"
+        title: "Seamless Reconnection",
+        description: "No worries of losing connection to room, re-connect in seconds with just a click.",
+        link: "#features"
     },
     {
-        title: "Easy Room Creation",
-        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
-        link: "https://www.google.com"
-    },
-    {
-        title: "Easy Room Creation",
-        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
-        link: "https://www.google.com"
-    },
-    {
-        title: "Easy Room Creation",
-        description: "Create a room with a unique ID and share it with your team. No need to worry about passwords or logins.",
-        link: "https://www.google.com"
+        title: "Afordable Pricing",
+        description: "Grab a pocket friendly deal and enjoy sharing code with ease.",
+        link: "/pricing"
     }
 ]
 
@@ -47,21 +37,21 @@ export default function Hero() {
     
     return (
         <div>
-        <section className="flex flex-col items-center justify-center min-h-[60vh] text-white font-bold text-4xl px-4 text-center mt-24">
-            <h1 className="py-4 text-5xl">
+        <section className="flex flex-col items-center justify-center min-h-[60vh] text-white font-bold text-2xl sm:text-4xl px-4 text-center mt-12 sm:mt-24">
+            <h1 className="py-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
                 <span className="text-blue-400">{'{ '}</span>
                 Code
                 <span className="text-blue-400">{' }'}</span>
                 {' '}Together.<Cover>Build Faster 🚀</Cover> 
             </h1>
-                <p className="font-normal text-lg text-gray-300 max-w-xl">
+                <p className="font-normal text-base sm:text-lg text-gray-300 max-w-xl px-4">
                 Collaborate in real-time with your team. Share code, ideas, and more—all in one place.
                 </p>
-            <div className="flex-row mx-auto space-x-14 mt-10">
-                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-amber-500" onClick={handleCreateRoom}>Create Room</button>
-                <button className="bg-blue-400 p-2.5 text-black cursor-pointer rounded-2xl font-medium text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg">Watch Demo</button>
+            <div className="flex flex-col sm:flex-row mx-auto gap-4 sm:gap-14 mt-8 sm:mt-10 px-4">
+                <button className="bg-white text-black cursor-pointer rounded-2xl p-3 font-medium text-lg sm:text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-amber-500 w-full sm:w-auto" onClick={handleCreateRoom}>Create Room</button>
+                <button className="bg-blue-400 p-2.5 text-black cursor-pointer rounded-2xl font-medium text-lg sm:text-xl transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg w-full sm:w-auto">Watch Demo</button>
             </div>
-            <div className="py-7">
+            <div className="py-7 px-4 w-full max-w-4xl mx-auto">
                     <CodeBlock
                     language="javascript"
                     filename="example.js"
@@ -88,7 +78,7 @@ export default function Hero() {
                         `}
                         />
              </div>
-              <h2 className="text-3xl font-bold text-center text-white relative w-fit mx-auto mt-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center text-white relative w-fit mx-auto mt-8 sm:mt-10 px-4">
                   Why CodeSync?
                 <span className="absolute left-0 -bottom-1 h-[2.5px] w-full bg-blue-500 rounded-full shadow-[0_0_15px_5px_rgba(59,130,246,0.5)] animate-ping"></span>
                </h2> 

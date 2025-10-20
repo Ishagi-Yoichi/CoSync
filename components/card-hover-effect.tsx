@@ -19,7 +19,7 @@ export const HoverEffect = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 py-10",
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-6 sm:py-10 px-4 gap-4 sm:gap-6",
         className
       )}
     >
@@ -27,7 +27,7 @@ export const HoverEffect = ({
         <a
           href={item?.link}
           key={item?.link}
-          className="relative group  block p-2 h-full w-full"
+          className="relative group block p-1 sm:p-2 h-full w-full"
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}
         >
@@ -68,12 +68,12 @@ export const Card = ({
   return (
     <div
       className={cn(
-        "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-white  dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
+        "rounded-2xl h-full w-full p-3 sm:p-4 overflow-hidden bg-black border border-white dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
         className
       )}
     >
       <div className="relative z-50">
-        <div className="p-4">{children}</div>
+        <div className="p-2 sm:p-4">{children}</div>
       </div>
     </div>
   );
@@ -86,7 +86,7 @@ export const CardTitle = ({
   children: React.ReactNode;
 }) => {
   return (
-    <h4 className={cn("text-zinc-100 font-bold tracking-wide mt-4", className)}>
+    <h4 className={cn("text-zinc-100 font-bold tracking-wide mt-2 sm:mt-4 text-sm sm:text-base", className)}>
       {children}
     </h4>
   );
@@ -101,7 +101,7 @@ export const CardDescription = ({
   return (
     <p
       className={cn(
-        "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
+        "mt-4 sm:mt-8 text-zinc-400 tracking-wide leading-relaxed text-xs sm:text-sm",
         className
       )}
     >
