@@ -17,6 +17,11 @@ export const HoverEffect = ({
   let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
+    <section>
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-white relative w-fit mx-auto mt-8 sm:mt-10 px-4">
+          Why CodeSync?
+          <span className="absolute left-0 -bottom-1 h-[2.5px] w-full bg-blue-500 rounded-full shadow-[0_0_15px_5px_rgba(59,130,246,0.5)] animate-ping"></span>
+      </h2>
     <div
       className={cn(
         "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-6 sm:py-10 px-4 gap-4 sm:gap-6",
@@ -55,6 +60,7 @@ export const HoverEffect = ({
         </a>
       ))}
     </div>
+    </section>
   );
 };
 

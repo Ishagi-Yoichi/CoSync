@@ -32,6 +32,7 @@ const Home = () => {
     };
 
     return (
+    
         <DotBackgroundDemo>
             <div className='flex flex-col items-center justify-center min-h-screen p-4'>
                 <div className='bg-white/95 backdrop-blur-sm w-full max-w-md sm:max-w-lg h-auto rounded-2xl shadow-2xl border border-white/20 p-6 sm:p-8'>
@@ -85,6 +86,7 @@ const Home = () => {
                 </div>
             </div>
         </DotBackgroundDemo>
+        
     )
 };
 

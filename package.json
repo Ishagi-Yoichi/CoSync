@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "build": "next build",
     "build:frontend": "next build",
+    "start": "next start",
     "start:frontend": "next start",
     "build:backend": "tsc",
     "start:backend": "node dist/server.js",

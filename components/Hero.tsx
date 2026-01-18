@@ -87,7 +87,7 @@ export default function Hero() {
             </motion.div>
             <motion.div 
                 animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
                 className="py-7 px-4 w-full max-w-4xl mx-auto">
             <CodeBlock
                 language="javascript"

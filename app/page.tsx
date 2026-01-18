@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 //import { useEffect } from "react";
 import toast from "react-hot-toast";
+import HeroBackground from "@/components/HeroBackground";
 
 
 export default async function Home() {
@@ -18,7 +19,7 @@ export default async function Home() {
  
   return (
    <div className="bg-black min-h-screen ">
-    
+    <HeroBackground/>
     <AppBar/>
     
     <Hero/>
