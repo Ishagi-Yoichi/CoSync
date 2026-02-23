@@ -198,18 +198,15 @@ io.on("connection", (socket: any) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
-  socket.on(ACTIONS.UPDATE, (data: { roomId: string; update: Uint8Array }) => {
+  socket.on(ACTIONS.UPDATE, (roomId: any, update: any) => {
     // Log this to see if data is actually flowing
-    console.log("Relaying update for room:", data.roomId);
-    socket.to(data.roomId).emit(ACTIONS.UPDATE, data);
+    console.log("Relaying update for room:", roomId);
+    socket.to(roomId).emit(ACTIONS.UPDATE, roomId, update);
   });
 
-  socket.on(
-    ACTIONS.AWARENESS_UPDATE,
-    (data: { roomId: string; update: Uint8Array }) => {
-      socket.to(data.roomId).emit(ACTIONS.AWARENESS_UPDATE, data);
-    }
-  );
+  socket.on(ACTIONS.AWARENESS_UPDATE, (roomId: any, update: any) => {
+    socket.to(roomId).emit(ACTIONS.AWARENESS_UPDATE, roomId, update);
+  });
 
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {

@@ -58,22 +58,17 @@ html {
 .remote-caret {
   position: relative;
   border-left: 2px solid;
-  border-right: 2px solid;
-  margin-left: -1px;
-  margin-right: -1px;
-  box-sizing: border-box;
+  height: 1.2em;
 }
 
 .remote-caret > div {
   position: absolute;
-  top: -15px;
+  top: -1.5em;
   left: -2px;
   font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 2px;
   color: white;
   white-space: nowrap;
-  padding: 1px 4px;
-  border-radius: 3px;
-  pointer-events: none;
-  font-family: sans-serif;
   z-index: 10;
 }

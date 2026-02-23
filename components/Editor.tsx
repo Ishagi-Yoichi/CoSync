@@ -47,24 +47,24 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
         // 5. SENDING: Emit updates to server
         ydoc.on('update', (update) => {
             // Force it into a Buffer to ensure Socket.io treats it as binary
-            socketRef.current.emit(ACTIONS.UPDATE, { roomId, update });
+            socketRef.current.emit(ACTIONS.UPDATE, roomId, update);
         });
 
         awareness.on('update', () => {
             const state = awarenessProtocol.encodeAwarenessUpdate(awareness, [ydoc.clientID]);
-            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, { roomId, update: state });
+            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, roomId, state);
         });
 
         // 6. RECEIVING: Handle incoming binary data
-        const handleRemoteUpdate = (data: any) => {
+        const handleRemoteUpdate = (incomingRoomId: any, update: any) => {
             // CRITICAL FIX: Ensure 'update' is a Uint8Array
-            const binaryUpdate = data.update instanceof Uint8Array ? data.update : new Uint8Array(data.update);
-            Y.applyUpdate(ydoc, binaryUpdate);
+            if (incomingRoomId !== roomId) return;
+            Y.applyUpdate(ydoc, new Uint8Array(update));
         };
 
-        const handleRemoteAwareness = (data: any) => {
-            const binaryUpdate = data.update instanceof Uint8Array ? data.update : new Uint8Array(data.update);
-            awarenessProtocol.applyAwarenessUpdate(awareness, binaryUpdate, socketRef.current);
+        const handleRemoteAwareness = (incomingRoomId: any, update: any) => {
+            if (incomingRoomId !== roomId) return;
+            awarenessProtocol.applyAwarenessUpdate(awareness, new Uint8Array(update), socketRef.current);
         };
 
         socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
