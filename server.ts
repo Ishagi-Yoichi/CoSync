@@ -205,13 +205,11 @@ io.on("connection", (socket: any) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
-  socket.on(ACTIONS.UPDATE, (roomId: string, update: Buffer) => {
-    console.log(
-      "UPDATE type:",
-      update?.constructor?.name,
-      "len:",
-      update?.length
-    );
+  socket.on(ACTIONS.UPDATE, (roomId: any, update: any) => {
+    const room = io.sockets.adapter.rooms.get(roomId);
+    console.log("UPDATE received, roomId:", roomId);
+    console.log("Room exists:", !!room, "Room size:", room?.size);
+    console.log("All rooms for this socket:", [...socket.rooms]);
     socket.to(roomId).emit(ACTIONS.UPDATE, roomId, update);
   });
 
