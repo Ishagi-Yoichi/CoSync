@@ -20,9 +20,8 @@ export const initSocket = (): Socket => {
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
     timeout: 20000,
-    // Start with polling so HTTP upgrade negotiates binary framing correctly
-    // then upgrades to websocket — this is Socket.IO's intended flow
-    transports: ["polling", "websocket"],
+
+    transports: ["websocket"],
     forceNew: false,
   });
 
