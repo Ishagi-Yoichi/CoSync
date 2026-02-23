@@ -29,11 +29,11 @@ body {
   .CodeMirror {
     font-size: 12px !important;
   }
-  
+
   .CodeMirror-lines {
     padding: 8px 4px !important;
   }
-  
+
   .CodeMirror-gutters {
     padding-right: 4px !important;
   }
@@ -55,3 +55,25 @@ html {
   }
 }
 
+.remote-caret {
+  position: relative;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  box-sizing: border-box;
+}
+
+.remote-caret > div {
+  position: absolute;
+  top: -15px;
+  left: -2px;
+  font-size: 10px;
+  color: white;
+  white-space: nowrap;
+  padding: 1px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+  font-family: sans-serif;
+  z-index: 10;
+}

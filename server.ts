@@ -40,7 +40,7 @@
 //         res.end(JSON.stringify(rooms, null, 2));
 //         return;
 //     }
-    
+
 //     res.writeHead(404);
 //     res.end('Not found');
 // });
@@ -64,12 +64,12 @@
 //         console.log(`Room ${roomId} does not exist`);
 //         return [];
 //     }
-    
+
 //     const clients = Array.from(room).map((socketId: unknown) => ({
 //         socketId: socketId as string,
 //         username: userSocketMap[socketId as string],
 //     }));
-    
+
 //     console.log(`Room ${roomId} has ${clients.length} clients:`, clients.map(c => c.username));
 //     return clients;
 // }
@@ -97,14 +97,14 @@
 //         userSocketMap[socket.id] = username;
 //         socket.join(roomId);
 //         const clients = getAllConnectedClients(roomId);
-        
+
 //         // Emit to all clients in the room (including the one who just joined)
 //         io.in(roomId).emit(ACTIONS.JOINED, {
 //             clients,
 //             username,
 //             socketId: socket.id,
 //         });
-        
+
 //         console.log(`User ${username} joined room ${roomId}. Total clients: ${clients.length}`);
 //     });
 
@@ -131,83 +131,91 @@
 
 // const PORT = process.env.PORT || 5000;
 // server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const { ACTIONS } = require('./Actions');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { ACTIONS } = require("./Actions");
 
 interface UserSocketMap {
-    [socketId: string]: string;
+  [socketId: string]: string;
 }
 
 interface JoinData {
-    roomId: string;
-    username: string;
+  roomId: string;
+  username: string;
 }
 
 interface CodeChangeData {
-    roomId: string;
-    code: string;
+  roomId: string;
+  code: string;
 }
 
 interface SyncCodeData {
-    socketId: string;
-    code: string;
+  socketId: string;
+  code: string;
 }
 
 const server = createServer();
 const io = new Server(server, {
-    cors: {
-        origin: ["http://localhost:3000", "http://127.0.0.1:3000"], // Allow Next.js dev server
-        methods: ["GET", "POST"],
-        credentials: true
-    }
+  cors: {
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
 const userSocketMap: UserSocketMap = {};
 
 function getAllConnectedClients(roomId: string) {
-    return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
-        (socketId: unknown) => ({
-            socketId: socketId as string,
-            username: userSocketMap[socketId as string],
-        })
-    );
+  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
+    (socketId: unknown) => ({
+      socketId: socketId as string,
+      username: userSocketMap[socketId as string],
+    })
+  );
 }
 
-io.on('connection', (socket: any) => {
-    console.log('socket connected', socket.id);
+io.on("connection", (socket: any) => {
+  console.log("socket connected", socket.id);
 
-    socket.on(ACTIONS.JOIN, ({ roomId, username }: JoinData) => {
-        userSocketMap[socket.id] = username;
-        socket.join(roomId);
-        const clients = getAllConnectedClients(roomId);
-        clients.forEach(({ socketId }) => {
-            io.to(socketId).emit(ACTIONS.JOINED, {
-                clients,
-                username,
-                socketId: socket.id,
-            });
-        });
+  socket.on(ACTIONS.JOIN, ({ roomId, username }: JoinData) => {
+    userSocketMap[socket.id] = username;
+    socket.join(roomId);
+    const clients = getAllConnectedClients(roomId);
+    clients.forEach(({ socketId }) => {
+      io.to(socketId).emit(ACTIONS.JOINED, {
+        clients,
+        username,
+        socketId: socket.id,
+      });
     });
+  });
 
-    socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }: CodeChangeData) => {
-        socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
-    });
+  socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }: CodeChangeData) => {
+    socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
+  });
 
-    socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }: SyncCodeData) => {
-        io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
-    });
+  socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }: SyncCodeData) => {
+    io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+  });
 
-    socket.on('disconnecting', () => {
-        for (const roomId of socket.rooms) {
-            if (roomId === socket.id) continue;
-            socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
-                socketId: socket.id,
-                username: userSocketMap[socket.id],
-            });
-        }
-        delete userSocketMap[socket.id];
-    });
+  socket.on(
+    ACTIONS.UPDATE,
+    ({ roomId, update }: { roomId: string; update: any }) => {
+      // We broadcast the binary update to everyone else in the room
+      socket.to(roomId).emit(ACTIONS.UPDATE, { update });
+    }
+  );
+
+  socket.on("disconnecting", () => {
+    for (const roomId of socket.rooms) {
+      if (roomId === socket.id) continue;
+      socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
+        socketId: socket.id,
+        username: userSocketMap[socket.id],
+      });
+    }
+    delete userSocketMap[socket.id];
+  });
 });
 
 const PORT = process.env.PORT || 5000;
