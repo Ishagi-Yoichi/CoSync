@@ -198,11 +198,16 @@ io.on("connection", (socket: any) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
+  socket.on(ACTIONS.UPDATE, (data: { roomId: string; update: Uint8Array }) => {
+    // Log this to see if data is actually flowing
+    console.log("Relaying update for room:", data.roomId);
+    socket.to(data.roomId).emit(ACTIONS.UPDATE, data);
+  });
+
   socket.on(
-    ACTIONS.UPDATE,
-    ({ roomId, update }: { roomId: string; update: any }) => {
-      // We broadcast the binary update to everyone else in the room
-      socket.to(roomId).emit(ACTIONS.UPDATE, { update });
+    ACTIONS.AWARENESS_UPDATE,
+    (data: { roomId: string; update: Uint8Array }) => {
+      socket.to(data.roomId).emit(ACTIONS.AWARENESS_UPDATE, data);
     }
   );
 

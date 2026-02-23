@@ -1,85 +1,89 @@
 "use client";
-
 import React, { useEffect, useRef } from 'react';
 import Codemirror from 'codemirror';
 import * as Y from 'yjs';
 //@ts-ignore
 import { CodemirrorBinding } from 'y-codemirror';
+import * as awarenessProtocol from 'y-protocols/awareness'; // Correct import for 2026 standards
+
+// Standard CM5 styles
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
 import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/edit/closebrackets';
-import * as awarenessProtocol from 'y-protocols/awareness.js'
 
 const { ACTIONS } = require('../Actions');
 
-interface EditorProps {
-    socketRef: React.MutableRefObject<any>;
-    roomId: string;
-    username: string;
-    onCodeChange: (code: string) => void;
-}
-
-const Editor = ({ socketRef, roomId, username, onCodeChange }: EditorProps) => {
+const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
     const editorRef = useRef<any>(null);
-    const ydocRef = useRef<Y.Doc>(new Y.Doc());
+    const ydocRef = useRef<Y.Doc | null>(null);
 
     useEffect(() => {
-        const textareaElement = document.getElementById('realtimeEditor') as HTMLTextAreaElement;
-        if (!textareaElement || editorRef.current) return;
+        if (!socketRef.current || editorRef.current) return;
 
-        // 1. Init CodeMirror
-        editorRef.current = Codemirror.fromTextArea(textareaElement, {
+        // 1. Initialize Yjs and Awareness
+        const ydoc = new Y.Doc();
+        ydocRef.current = ydoc;
+        const ytext = ydoc.getText('codemirror');
+        const awareness = new awarenessProtocol.Awareness(ydoc);
+
+        // 2. Setup CodeMirror 5
+        const textarea = document.getElementById('realtimeEditor') as HTMLTextAreaElement;
+        editorRef.current = Codemirror.fromTextArea(textarea, {
             mode: { name: 'javascript', json: true },
             theme: 'dracula',
-            autoCloseTags: true,
-            autoCloseBrackets: true,
             lineNumbers: true,
-            lineWrapping: true,
+            autoCloseBrackets: true,
         });
 
-        const ytext = ydocRef.current.getText('codemirror');
-        const awareness = new awarenessProtocol.Awareness(ydocRef.current);
-
-        // 2. Set Cursor Identity
-        const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-        awareness.setLocalStateField('user', { name: username, color });
-
-        // 3. Binding
+        // 3. The Binding (This links CM5 + Yjs + Awareness)
         const binding = new CodemirrorBinding(ytext, editorRef.current, awareness);
 
-        // 4. Outgoing Sync
-        ydocRef.current.on('update', (update) => {
-            socketRef.current?.emit(ACTIONS.UPDATE, { roomId, update: Buffer.from(update) });
+        // 4. Set local user state for cursors
+        awareness.setLocalStateField('user', {
+            name: username,
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        });
+
+        // 5. SENDING: Emit updates to server
+        ydoc.on('update', (update) => {
+            // Force it into a Buffer to ensure Socket.io treats it as binary
+            socketRef.current.emit(ACTIONS.UPDATE, { roomId, update });
         });
 
         awareness.on('update', () => {
-            const state = awarenessProtocol.encodeAwarenessUpdate(awareness, [ydocRef.current.clientID]);
-            socketRef.current?.emit(ACTIONS.AWARENESS_UPDATE, { roomId, update: Buffer.from(state) });
+            const state = awarenessProtocol.encodeAwarenessUpdate(awareness, [ydoc.clientID]);
+            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, { roomId, update: state });
         });
 
-        // 5. Parent Callback
+        // 6. RECEIVING: Handle incoming binary data
+        const handleRemoteUpdate = (data: any) => {
+            // CRITICAL FIX: Ensure 'update' is a Uint8Array
+            const binaryUpdate = data.update instanceof Uint8Array ? data.update : new Uint8Array(data.update);
+            Y.applyUpdate(ydoc, binaryUpdate);
+        };
+
+        const handleRemoteAwareness = (data: any) => {
+            const binaryUpdate = data.update instanceof Uint8Array ? data.update : new Uint8Array(data.update);
+            awarenessProtocol.applyAwarenessUpdate(awareness, binaryUpdate, socketRef.current);
+        };
+
+        socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
+        socketRef.current.on(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+
+        // Track code for the parent component
         ytext.observe(() => onCodeChange(ytext.toString()));
-
-        // 6. Incoming Sync
-        const handleUpdate = ({ update }: any) => Y.applyUpdate(ydocRef.current, new Uint8Array(update));
-        const handleAwareness = ({ update }: any) => awarenessProtocol.applyAwarenessUpdate(awareness, new Uint8Array(update), socketRef.current);
-
-        socketRef.current.on(ACTIONS.UPDATE, handleUpdate);
-        socketRef.current.on(ACTIONS.AWARENESS_UPDATE, handleAwareness);
 
         return () => {
             binding.destroy();
+            ydoc.destroy();
             editorRef.current?.toTextArea();
-            socketRef.current?.off(ACTIONS.UPDATE);
-            socketRef.current?.off(ACTIONS.AWARENESS_UPDATE);
-            ydocRef.current.destroy();
+            socketRef.current.off(ACTIONS.UPDATE);
+            socketRef.current.off(ACTIONS.AWARENESS_UPDATE);
         };
-    }, [roomId, username]);
+    }, [roomId]);
 
     return (
-        <div className="flex-1 h-full overflow-hidden border-l border-slate-700">
+        <div className="flex-1 h-full border-l border-slate-800">
             <textarea id="realtimeEditor"></textarea>
         </div>
     );
