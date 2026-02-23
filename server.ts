@@ -199,8 +199,14 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on(ACTIONS.UPDATE, (roomId: any, update: any) => {
-    // Log this to see if data is actually flowing
-    console.log("Relaying update for room:", roomId);
+    console.log(
+      "UPDATE received, type:",
+      typeof update,
+      "isBuffer:",
+      Buffer.isBuffer(update),
+      "length:",
+      update?.length ?? update?.byteLength
+    );
     socket.to(roomId).emit(ACTIONS.UPDATE, roomId, update);
   });
 

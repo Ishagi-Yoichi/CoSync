@@ -16,9 +16,11 @@ const { ACTIONS } = require('../Actions');
 const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
     const editorContainerRef = useRef<HTMLDivElement>(null);
     const editorInstanceRef = useRef<any>(null);
-    const ydocRef = useRef<Y.Doc>(new Y.Doc());
+    const ydocRef = useRef<Y.Doc | null>(null);
 
     useEffect(() => {
+        const ydoc = new Y.Doc();
+        ydocRef.current = ydoc;
         if (!socketRef.current || !editorContainerRef.current) return;
 
         // 1. Initialize CodeMirror on a plain textarea
@@ -35,7 +37,7 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
         editorInstanceRef.current = editor;
 
         // 2. Setup Yjs
-        const ydoc = ydocRef.current;
+        //const ydoc = ydocRef.current;
         const ytext = ydoc.getText('codemirror');
         const awareness = new awarenessProtocol.Awareness(ydoc);
 
@@ -49,27 +51,37 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
         const binding = new CodemirrorBinding(ytext, editor, awareness);
 
         // 5. Binary Transmissions (Flat Arguments)
-        ydoc.on('update', (update: Uint8Array) => {
-            socketRef.current.emit(ACTIONS.UPDATE, roomId, update);
+        ydoc.on('update', (update: Uint8Array, origin: any) => {
+            // 'remote' is the origin we'll set when applying incoming updates
+            if (origin === 'remote') return;
+            socketRef.current.emit(ACTIONS.UPDATE, roomId, Buffer.from(update));
         });
 
         awareness.on('update', () => {
             const state = awarenessProtocol.encodeAwarenessUpdate(awareness, [ydoc.clientID]);
-            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, roomId, state);
+            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, roomId, Buffer.from(state));
         });
+
+        const toUint8Array = (data: any): Uint8Array => {
+            if (data instanceof Uint8Array) return data;
+            if (data instanceof ArrayBuffer) return new Uint8Array(data);
+            if (data?.data) return new Uint8Array(data.data); // Socket.IO Buffer wrapper
+            if (Array.isArray(data)) return new Uint8Array(data);
+            // Plain object with numeric keys (Socket.IO serialized Uint8Array)
+            if (typeof data === 'object') return new Uint8Array(Object.values(data));
+            return new Uint8Array();
+        };
 
         // 6. Incoming Handlers (Using Uint8Array specifically)
         const handleRemoteUpdate = (incRoomId: string, update: ArrayBuffer) => {
             if (incRoomId !== roomId) return;
-            // The check for ArrayBuffer vs Uint8Array is crucial here
-            const u8 = update instanceof Uint8Array ? update : new Uint8Array(update);
-            Y.applyUpdate(ydoc, u8);
+            Y.applyUpdate(ydoc, toUint8Array(update), 'remote'); //pass origin
         };
 
-        const handleRemoteAwareness = (incRoomId: string, update: ArrayBuffer) => {
+        const handleRemoteAwareness = (incRoomId: string, update: any) => {
             if (incRoomId !== roomId) return;
-            const u8 = update instanceof Uint8Array ? update : new Uint8Array(update);
-            awarenessProtocol.applyAwarenessUpdate(awareness, u8, socketRef.current);
+
+            awarenessProtocol.applyAwarenessUpdate(awareness, toUint8Array(update), socketRef.current);
         };
 
         socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
