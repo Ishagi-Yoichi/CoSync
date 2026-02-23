@@ -75,8 +75,15 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
 
         // 6. Incoming Handlers (Using Uint8Array specifically)
         const handleRemoteUpdate = (incRoomId: string, update: any) => {
-            if (incRoomId !== roomId) return;
-            Y.applyUpdate(ydoc, toUint8Array(update), 'remote');
+            console.log('received update for room:', incRoomId, 'my room:', roomId);
+            console.log('update data:', update, 'type:', typeof update, Array.isArray(update));
+            if (incRoomId !== roomId) {
+                console.log('ROOM MISMATCH — skipping');
+                return;
+            }
+            const u8 = toUint8Array(update);
+            console.log('applying u8 of length:', u8.length);
+            Y.applyUpdate(ydoc, u8, 'remote');
         };
 
         const handleRemoteAwareness = (incRoomId: string, update: any) => {
