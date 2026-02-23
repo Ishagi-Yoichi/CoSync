@@ -1,30 +1,37 @@
 "use client";
-import { io, Socket } from 'socket.io-client';
+import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
-export const initSocket = () => {
-    if(!socket){
-    const options = {
-        forceNew: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 20000,
-        transports: ['websocket', 'polling'],
-        upgrade: true,
-        rememberUpgrade: true,
-    };
-    const serverUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-   
-   
-//     if(typeof window !=="undefined"){
-//     return io(serverUrl, options);
-//    }
-        socket = io(serverUrl,options);
+export const initSocket = (): Socket => {
+  // Return existing live socket
+  if (socket?.connected) return socket;
 
-}
-    
-   return socket;
-    
+  // Disconnect stale socket before recreating
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  const serverUrl =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+  socket = io(serverUrl, {
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    timeout: 20000,
+    // Start with polling so HTTP upgrade negotiates binary framing correctly
+    // then upgrades to websocket — this is Socket.IO's intended flow
+    transports: ["polling", "websocket"],
+    forceNew: false,
+  });
+
+  return socket;
+};
+
+export const resetSocket = (): void => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };

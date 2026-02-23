@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Users, Copy, LogOut, Terminal, Zap } from 'lucide-react';
-import { initSocket } from '../../socket';
+
 import Client from '../../components/Client';
+import { initSocket, resetSocket } from '../../socket';
 
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), { ssr: false });
@@ -41,7 +42,9 @@ const EditorPageContent = () => {
 
         socket.on('connect_error', () => router.push('/'));
 
-        return () => socket.disconnect();
+        return () => {
+            resetSocket();
+        };
     }, [roomId, username]);
 
     const copyRoomId = async () => {
@@ -98,7 +101,7 @@ const EditorPageContent = () => {
                         <span className="text-xs font-mono text-slate-400">main.js — Editing</span>
                     </div>
                 </div>
-                <Editor socketRef={socketRef} roomId={roomId} username={username} onCodeChange={(code) => { }} />
+                <Editor socketRef={socketRef} roomId={roomId} username={username} onCodeChange={(code: any) => { }} />
             </main>
         </div>
     );

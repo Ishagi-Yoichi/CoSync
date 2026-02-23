@@ -54,26 +54,26 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
         ydoc.on('update', (update: Uint8Array, origin: any) => {
             // 'remote' is the origin we'll set when applying incoming updates
             if (origin === 'remote') return;
-            socketRef.current.emit(ACTIONS.UPDATE, roomId, Buffer.from(update));
+            socketRef.current.emit(ACTIONS.UPDATE, roomId, update);
         });
 
         awareness.on('update', () => {
             const state = awarenessProtocol.encodeAwarenessUpdate(awareness, [ydoc.clientID]);
-            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, roomId, Buffer.from(state));
+            socketRef.current.emit(ACTIONS.AWARENESS_UPDATE, roomId, state);
         });
 
         const toUint8Array = (data: any): Uint8Array => {
             if (data instanceof Uint8Array) return data;
             if (data instanceof ArrayBuffer) return new Uint8Array(data);
-            if (data?.data) return new Uint8Array(data.data); // Socket.IO Buffer wrapper
+            // Socket.IO delivers Node Buffer to browser as ArrayBuffer-like object
+            if (data?.buffer instanceof ArrayBuffer) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
             if (Array.isArray(data)) return new Uint8Array(data);
-            // Plain object with numeric keys (Socket.IO serialized Uint8Array)
-            if (typeof data === 'object') return new Uint8Array(Object.values(data));
+            if (typeof data === 'object' && data !== null) return new Uint8Array(Object.values(data));
             return new Uint8Array();
         };
 
         // 6. Incoming Handlers (Using Uint8Array specifically)
-        const handleRemoteUpdate = (incRoomId: string, update: ArrayBuffer) => {
+        const handleRemoteUpdate = (incRoomId: string, update: any) => {
             if (incRoomId !== roomId) return;
             Y.applyUpdate(ydoc, toUint8Array(update), 'remote'); //pass origin
         };
@@ -96,8 +96,9 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
             ydoc.destroy();
             editor.toTextArea();
             if (editorContainerRef.current) editorContainerRef.current.innerHTML = '';
-            socketRef.current.off(ACTIONS.UPDATE, handleRemoteUpdate);
-            socketRef.current.off(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+            socketRef.current?.off(ACTIONS.UPDATE, handleRemoteUpdate);
+            socketRef.current?.off(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+            // No socket.disconnect() here — that's handled by editorPage cleanup
         };
     }, [roomId]); // Re-run if room changes
 

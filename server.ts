@@ -161,6 +161,9 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
+  maxHttpBufferSize: 1e8, // 100MB, default is 1MB which can drop large Yjs state vectors
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 const userSocketMap: UserSocketMap = {};
@@ -198,14 +201,12 @@ io.on("connection", (socket: any) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
-  socket.on(ACTIONS.UPDATE, (roomId: any, update: any) => {
+  socket.on(ACTIONS.UPDATE, (roomId: string, update: Buffer) => {
     console.log(
-      "UPDATE received, type:",
-      typeof update,
-      "isBuffer:",
-      Buffer.isBuffer(update),
-      "length:",
-      update?.length ?? update?.byteLength
+      "UPDATE type:",
+      update?.constructor?.name,
+      "len:",
+      update?.length
     );
     socket.to(roomId).emit(ACTIONS.UPDATE, roomId, update);
   });
