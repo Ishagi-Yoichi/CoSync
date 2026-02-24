@@ -7,6 +7,9 @@ const SOCKET_ACTIONS = {
   LEAVE: "leave",
   UPDATE: "update",
   AWARENESS_UPDATE: "awareness-update",
+  REQUEST_SYNC: "request-sync",
+  SYNC_STATE: "sync-state",
+  SEND_SYNC: "send-sync",
 };
 
 module.exports = { ACTIONS: SOCKET_ACTIONS };

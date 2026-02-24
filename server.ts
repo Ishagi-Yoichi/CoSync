@@ -154,6 +154,8 @@ interface SyncCodeData {
   code: string;
 }
 
+const roomStates: { [roomId: string]: number[] } = {};
+
 const server = createServer();
 const io = new Server(server, {
   cors: {
@@ -211,6 +213,16 @@ io.on("connection", (socket: any) => {
     console.log("Room exists:", !!room, "Room size:", room?.size);
     console.log("All rooms for this socket:", [...socket.rooms]);
     socket.to(roomId).emit(ACTIONS.UPDATE, roomId, update);
+  });
+
+  socket.on(ACTIONS.REQUEST_SYNC, (roomId: string) => {
+    if (roomStates[roomId]) {
+      socket.emit(ACTIONS.SYNC_STATE, roomStates[roomId]);
+    }
+  });
+
+  socket.on(ACTIONS.SEND_SYNC, (roomId: string, state: number[]) => {
+    roomStates[roomId] = state;
   });
 
   socket.on(ACTIONS.AWARENESS_UPDATE, (roomId: any, update: any) => {

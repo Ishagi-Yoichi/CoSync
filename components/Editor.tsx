@@ -18,8 +18,9 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
     const editorContainerRef = useRef<HTMLDivElement>(null);
     const editorInstanceRef = useRef<any>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
-
+    const isApplyingRemote = useRef(false);
     useEffect(() => {
+
         const ydoc = new Y.Doc();
         ydocRef.current = ydoc;
         if (!socketRef.current || !editorContainerRef.current) return;
@@ -62,7 +63,9 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
 
         // 5. Binary Transmissions (Flat Arguments)
         ydoc.on('update', (update: Uint8Array, origin: any) => {
-            if (origin === 'remote') return;
+            if (isApplyingRemote.current) return; //don't re-emit remote updates
+            const fullState = toNumberArray(Y.encodeStateAsUpdate(ydoc));
+            socketRef.current.emit(ACTIONS.SEND_SYNC, roomId, fullState);
             socketRef.current.emit(ACTIONS.UPDATE, roomId, toNumberArray(update));
         });
 
@@ -81,9 +84,9 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
                 console.log('ROOM MISMATCH — skipping');
                 return;
             }
-            const u8 = toUint8Array(update);
-            console.log('applying u8 of length:', u8.length);
-            Y.applyUpdate(ydoc, u8, 'remote');
+            isApplyingRemote.current = true;
+            Y.applyUpdate(ydoc, toUint8Array(update));
+            isApplyingRemote.current = false;
         };
 
         const handleRemoteAwareness = (incRoomId: string, update: any) => {
@@ -93,6 +96,14 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
 
         socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
         socketRef.current.on(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+        socketRef.current.emit(ACTIONS.REQUEST_SYNC, roomId);
+
+        const handleSyncState = (state: any) => {
+            isApplyingRemote.current = true;
+            Y.applyUpdate(ydoc, toUint8Array(state));
+            isApplyingRemote.current = false;
+        };
+        socketRef.current.on(ACTIONS.SYNC_STATE, handleSyncState);
 
         ytext.observe(() => {
             onCodeChange(ytext.toString());
@@ -105,6 +116,7 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
             if (editorContainerRef.current) editorContainerRef.current.innerHTML = '';
             socketRef.current?.off(ACTIONS.UPDATE, handleRemoteUpdate);
             socketRef.current?.off(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+            socketRef.current?.off(ACTIONS.SYNC_STATE, handleSyncState);
             // No socket.disconnect() here — that's handled by editorPage cleanup
         };
     }, [roomId]); // Re-run if room changes
