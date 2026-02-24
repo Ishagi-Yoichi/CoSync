@@ -8,7 +8,7 @@
     "build:frontend": "next build",
     "start": "next start",
     "start:frontend": "next start",
-    "build:backend": "tsc",
+    "build:backend": "tsc --project tsconfig.server.json",
     "start:backend": "node dist/server.js",
     "lint": "next lint --max-warnings=0",
     "server": "tsx server.ts",
