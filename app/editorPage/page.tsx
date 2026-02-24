@@ -4,12 +4,21 @@ import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Users, Copy, LogOut, Terminal, Zap } from 'lucide-react';
-
 import Client from '../../components/Client';
 import { initSocket, resetSocket } from '../../socket';
 
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), { ssr: false });
+
+const LANGUAGES = [
+    { label: 'JavaScript', mode: 'javascript', ext: 'js' },
+    { label: 'TypeScript', mode: 'javascript', ext: 'ts' },
+    { label: 'Python', mode: 'python', ext: 'py' },
+    { label: 'C++', mode: 'clike', ext: 'cpp' },
+    { label: 'Java', mode: 'clike', ext: 'java' },
+    { label: 'HTML', mode: 'htmlmixed', ext: 'html' },
+    { label: 'CSS', mode: 'css', ext: 'css' },
+];
 
 const EditorPageContent = () => {
     const socketRef = useRef<any>(null);
@@ -20,6 +29,8 @@ const EditorPageContent = () => {
 
     const [clients, setClients] = useState<{ socketId: string; username: string }[]>([]);
     const [isConnected, setIsConnected] = useState(false);
+    const [language, setLanguage] = useState(LANGUAGES[0]);
+    const [fontSize, setFontSize] = useState(14);
 
     useEffect(() => {
         const socket = initSocket();
@@ -40,12 +51,26 @@ const EditorPageContent = () => {
             setClients((prev) => prev.filter(c => c.socketId !== socketId));
         });
 
+        socket.on(ACTIONS.LANGUAGE_CHANGE, ({ language: incoming }: any) => {
+            const found = LANGUAGES.find(l => l.mode === incoming.mode && l.label === incoming.label);
+            if (found) {
+                setLanguage(found);
+                toast(`Language changed to ${found.label}`, { icon: '🌐' });
+            }
+        });
+
         socket.on('connect_error', () => router.push('/'));
 
-        return () => {
-            resetSocket();
-        };
+        return () => { resetSocket(); };
     }, [roomId, username]);
+
+    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const found = LANGUAGES.find(l => l.label === e.target.value);
+        if (!found) return;
+        setLanguage(found);
+        socketRef.current?.emit(ACTIONS.LANGUAGE_CHANGE, { roomId, language: found });
+        toast(`Switched to ${found.label}`, { icon: '🌐' });
+    };
 
     const copyRoomId = async () => {
         await navigator.clipboard.writeText(roomId);
@@ -95,13 +120,68 @@ const EditorPageContent = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col bg-[#282a36]">
+                {/* Top bar */}
                 <div className="h-10 bg-slate-900 border-b border-slate-800 flex items-center px-4 justify-between">
                     <div className="flex items-center gap-2">
                         <Zap size={14} className="text-yellow-500 fill-yellow-500" />
-                        <span className="text-xs font-mono text-slate-400">main.js — Editing</span>
+                        <span className="text-xs font-mono text-slate-400">
+                            main.{language.ext} — Editing
+                        </span>
                     </div>
+                    {/* Language Selector */}
+                    <select
+                        value={language.label}
+                        onChange={handleLanguageChange}
+                        className="bg-slate-800 text-slate-200 text-xs font-mono border border-slate-700 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                    >
+                        {LANGUAGES.map(l => (
+                            <option key={l.label} value={l.label}>{l.label}</option>
+                        ))}
+                    </select>
                 </div>
-                <Editor socketRef={socketRef} roomId={roomId} username={username} onCodeChange={(code: any) => { }} />
+
+                {/* Editor wrapper — relative so floating toolbar can position inside */}
+                <div className="flex-1 relative overflow-hidden">
+                    {/* Floating Toolbar */}
+                    <div className="absolute top-3 right-3 z-50 flex items-center gap-2 bg-slate-900/90 backdrop-blur-sm border border-slate-700 rounded-lg px-3 py-1.5 shadow-xl">
+                        {/* Font size */}
+                        <span className="text-xs text-slate-400 font-mono">Aa</span>
+                        <button
+                            onClick={() => setFontSize(s => Math.max(10, s - 1))}
+                            className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-700 text-slate-300 text-sm font-bold transition-colors"
+                        >−</button>
+                        <span className="text-xs font-mono text-slate-300 w-6 text-center">{fontSize}</span>
+                        <button
+                            onClick={() => setFontSize(s => Math.min(28, s + 1))}
+                            className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-700 text-slate-300 text-sm font-bold transition-colors"
+                        >+</button>
+
+                        <div className="w-px h-4 bg-slate-700 mx-1" />
+
+                        {/* Copy code */}
+                        <button
+                            onClick={() => {
+                                const code = (window as any).__cosync_code__ ?? '';
+                                navigator.clipboard.writeText(code);
+                                toast.success('Code copied!');
+                            }}
+                            className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors font-mono"
+                        >
+                            <Copy size={12} /> Copy Code
+                        </button>
+                    </div>
+
+                    <Editor
+                        socketRef={socketRef}
+                        roomId={roomId}
+                        username={username}
+                        language={language}
+                        fontSize={fontSize}
+                        onCodeChange={(code: string) => {
+                            (window as any).__cosync_code__ = code;
+                        }}
+                    />
+                </div>
             </main>
         </div>
     );

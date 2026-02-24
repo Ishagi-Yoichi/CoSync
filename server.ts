@@ -238,6 +238,13 @@ io.on("connection", (socket: any) => {
     socket.to(roomId).emit(ACTIONS.AWARENESS_UPDATE, roomId, update);
   });
 
+  socket.on(
+    ACTIONS.LANGUAGE_CHANGE,
+    ({ roomId, language }: { roomId: string; language: string }) => {
+      socket.to(roomId).emit(ACTIONS.LANGUAGE_CHANGE, { language });
+    }
+  );
+
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {
       if (roomId === socket.id) continue;

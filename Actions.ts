@@ -10,6 +10,7 @@ const SOCKET_ACTIONS = {
   REQUEST_SYNC: "request-sync",
   SYNC_STATE: "sync-state",
   SEND_SYNC: "send-sync",
+  LANGUAGE_CHANGE: "language-change",
 };
 
 module.exports = { ACTIONS: SOCKET_ACTIONS };
