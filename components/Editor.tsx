@@ -62,11 +62,10 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
         };
 
         // 5. Binary Transmissions (Flat Arguments)
-        ydoc.on('update', (update: Uint8Array, origin: any) => {
-            if (isApplyingRemote.current) return; //don't re-emit remote updates
-            const fullState = toNumberArray(Y.encodeStateAsUpdate(ydoc));
-            socketRef.current.emit(ACTIONS.SEND_SYNC, roomId, fullState);
+        ydoc.on('update', (update: Uint8Array) => {
+            if (isApplyingRemote.current) return;
             socketRef.current.emit(ACTIONS.UPDATE, roomId, toNumberArray(update));
+            // No SEND_SYNC here — that's only for new joiners
         });
 
         awareness.on('update', () => {
@@ -94,16 +93,26 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
             awarenessProtocol.applyAwarenessUpdate(awareness, toUint8Array(update), socketRef.current);
         };
 
-        socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
-        socketRef.current.on(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
-        socketRef.current.emit(ACTIONS.REQUEST_SYNC, roomId);
+        const handleRequestSync = ({ requesterId }: { requesterId: string }) => {
+            const fullState = toNumberArray(Y.encodeStateAsUpdate(ydoc));
+            socketRef.current.emit(ACTIONS.SEND_SYNC, {
+                targetId: requesterId,
+                state: fullState
+            });
+        };
 
         const handleSyncState = (state: any) => {
             isApplyingRemote.current = true;
             Y.applyUpdate(ydoc, toUint8Array(state));
             isApplyingRemote.current = false;
         };
+
+        socketRef.current.on(ACTIONS.UPDATE, handleRemoteUpdate);
+        socketRef.current.on(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+        socketRef.current.on(ACTIONS.REQUEST_SYNC, handleRequestSync);  // listen
         socketRef.current.on(ACTIONS.SYNC_STATE, handleSyncState);
+        socketRef.current.emit(ACTIONS.REQUEST_SYNC, roomId);  // emit after listeners are set up
+
 
         ytext.observe(() => {
             onCodeChange(ytext.toString());
@@ -116,6 +125,7 @@ const Editor = ({ socketRef, roomId, username, onCodeChange }: any) => {
             if (editorContainerRef.current) editorContainerRef.current.innerHTML = '';
             socketRef.current?.off(ACTIONS.UPDATE, handleRemoteUpdate);
             socketRef.current?.off(ACTIONS.AWARENESS_UPDATE, handleRemoteAwareness);
+            socketRef.current?.off(ACTIONS.REQUEST_SYNC, handleRequestSync);
             socketRef.current?.off(ACTIONS.SYNC_STATE, handleSyncState);
             // No socket.disconnect() here — that's handled by editorPage cleanup
         };

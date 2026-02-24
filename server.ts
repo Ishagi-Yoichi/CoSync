@@ -197,6 +197,12 @@ io.on("connection", (socket: any) => {
         socketId: socket.id,
       });
     });
+    const existingClient = clients.find((c) => c.socketId !== socket.id);
+    if (existingClient) {
+      io.to(existingClient.socketId).emit(ACTIONS.REQUEST_SYNC, {
+        requesterId: socket.id, // who needs the state
+      });
+    }
   });
 
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }: CodeChangeData) => {
@@ -221,9 +227,12 @@ io.on("connection", (socket: any) => {
     }
   });
 
-  socket.on(ACTIONS.SEND_SYNC, (roomId: string, state: number[]) => {
-    roomStates[roomId] = state;
-  });
+  socket.on(
+    ACTIONS.SEND_SYNC,
+    ({ targetId, state }: { targetId: string; state: number[] }) => {
+      io.to(targetId).emit(ACTIONS.SYNC_STATE, state);
+    }
+  );
 
   socket.on(ACTIONS.AWARENESS_UPDATE, (roomId: any, update: any) => {
     socket.to(roomId).emit(ACTIONS.AWARENESS_UPDATE, roomId, update);
