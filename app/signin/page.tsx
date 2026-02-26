@@ -67,7 +67,7 @@ export function SignInForm() {
             />
           </label>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm">"Something went wrong, please try again After some time"</p>}
 
           <button
             type="submit"

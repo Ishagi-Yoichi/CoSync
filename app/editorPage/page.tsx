@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Users, Copy, LogOut, Terminal, Zap } from 'lucide-react';
 import Client from '../../components/Client';
 import { initSocket, resetSocket } from '../../socket';
+import { saveSession, clearSession } from '../home/page';
 
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), { ssr: false });
@@ -33,13 +34,28 @@ const EditorPageContent = () => {
     const [fontSize, setFontSize] = useState(14);
 
     useEffect(() => {
+        // If no roomId/username in URL but session exists, redirect to editor
+        if (!roomId || !username) {
+            const { getSession } = require('../home/page');
+            const session = getSession();
+            if (session) {
+                router.replace(`/editorPage?roomId=${session.roomId}&username=${encodeURIComponent(session.username)}`);
+            } else {
+                router.replace('/home');
+            }
+        }
+    }, []);
+
+    useEffect(() => {
         const socket = initSocket();
         socketRef.current = socket;
 
         socket.on('connect', () => {
             setIsConnected(true);
             socket.emit(ACTIONS.JOIN, { roomId, username });
+            saveSession(roomId, username);
         });
+
 
         socket.on(ACTIONS.JOINED, ({ clients, username: joinedUser }: any) => {
             setClients(clients);
@@ -112,7 +128,10 @@ const EditorPageContent = () => {
                     <button onClick={copyRoomId} className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-lg transition-all active:scale-95 text-sm font-medium border border-slate-700">
                         <Copy size={16} /> Copy Room ID
                     </button>
-                    <button onClick={() => router.push('/')} className="w-full flex items-center justify-center gap-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white py-2.5 rounded-lg transition-all active:scale-95 text-sm font-medium border border-rose-500/20">
+                    <button onClick={() => {
+                        clearSession();
+                        router.push('/')
+                    }} className="w-full flex items-center justify-center gap-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white py-2.5 rounded-lg transition-all active:scale-95 text-sm font-medium border border-rose-500/20">
                         <LogOut size={16} /> Leave Session
                     </button>
                 </div>
@@ -158,7 +177,7 @@ const EditorPageContent = () => {
 
                         <div className="w-px h-4 bg-slate-700 mx-1" />
 
-                        {/* Copy code */}
+
                         <button
                             onClick={() => {
                                 const code = (window as any).__cosync_code__ ?? '';

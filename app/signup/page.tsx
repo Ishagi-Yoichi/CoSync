@@ -2,12 +2,12 @@
 import { prisma } from "@/lib/prisma";
 import { Suspense } from "react";
 import { Geist } from 'next/font/google';
-import { useRouter,useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const geist = Geist({ subsets: ['latin'] });
 
-export  function SignUpForm() {
+export function SignUpForm() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -72,7 +72,7 @@ export  function SignUpForm() {
             />
           </label>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm">"Something went wrong please try after some time"</p>}
           {success && <p className="text-green-600 text-sm">{success}</p>}
 
           <button
