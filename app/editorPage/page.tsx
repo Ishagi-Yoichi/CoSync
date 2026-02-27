@@ -92,6 +92,18 @@ const EditorPageContent = () => {
         return () => { resetSocket(); };
     }, [roomId, username]);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsLangMenuOpen(false);
+        };
+
+        if (isLangMenuOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+        }
+
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isLangMenuOpen]);
+
     const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const found = LANGUAGES.find(l => l.label === e.target.value);
         if (!found) return;
