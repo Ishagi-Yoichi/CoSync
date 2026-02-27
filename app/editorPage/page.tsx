@@ -15,7 +15,7 @@ import {
 
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), { ssr: false });
-const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+
 
 const LANGUAGES = [
     { label: 'JavaScript', mode: 'javascript', ext: 'js' },
@@ -28,12 +28,13 @@ const LANGUAGES = [
 ];
 
 const EditorPageContent = () => {
+
     const socketRef = useRef<any>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
     const roomId = searchParams.get('roomId') ?? '';
     const username = searchParams.get('username') ?? '';
-
+    const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const [clients, setClients] = useState<{ socketId: string; username: string }[]>([]);
     const [isConnected, setIsConnected] = useState(false);
     const [language, setLanguage] = useState(LANGUAGES[0]);
