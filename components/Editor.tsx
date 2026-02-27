@@ -135,7 +135,7 @@ const Editor = ({ socketRef, roomId, username, onCodeChange, language, fontSize 
     }, [roomId]);
 
     return (
-        <div className="flex-1 h-full overflow-hidden" ref={editorContainerRef} />
+        <div className="flex-1 h-full overflow-hidden " ref={editorContainerRef} />
     );
 };
 

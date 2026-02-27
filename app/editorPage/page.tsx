@@ -107,14 +107,14 @@ const EditorPageContent = () => {
     if (!username) return null;
 
     return (
-        <div className="flex h-screen bg-[#050508] text-slate-300 font-sans selection:bg-blue-500/30 overflow-hidden">
+        <div className="h-screen w-screen overflow-hidden bg-[#050508] text-slate-300 font-sans selection:bg-blue-500/30 flex">
 
-            {/* Background Decorative Glows */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full" />
+            {/* Background Decorative Glows - Non-interactive */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Sidebar */}
-            <aside className="w-80 bg-[#0A0A0F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-20">
+            {/* --- SIDEBAR --- */}
+            <aside className="w-80 h-full bg-[#0A0A0F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-20 shadow-2xl shrink-0">
                 {/* Logo Section */}
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-8">
@@ -128,10 +128,12 @@ const EditorPageContent = () => {
                             <h1 className="font-bold text-lg tracking-tight text-white leading-none">CoSync</h1>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
                                 </span>
-                                <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-emerald-500/80">System Live</span>
+                                <span className={`text-[10px] uppercase tracking-[0.15em] font-bold ${isConnected ? 'text-emerald-500/80' : 'text-red-500/80'}`}>
+                                    {isConnected ? 'System Live' : 'Offline'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -146,25 +148,25 @@ const EditorPageContent = () => {
                             <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-mono text-slate-500">{clients.length} online</span>
                         </div>
 
-                        <div className="space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
-                            {clients.map((client) => (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    key={client.socketId}
-                                    className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group cursor-pointer"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-inner">
-                                        {client.username.charAt(0).toUpperCase()}
-                                    </div>
-                                    <span className="text-sm font-medium text-slate-400 group-hover:text-slate-200 transition-colors">{client.username}</span>
-                                </motion.div>
-                            ))}
+                        {/* Independent Scroll for User List */}
+                        <div className="space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+                            <AnimatePresence>
+                                {clients.map((client) => (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        key={client.socketId}
+                                    >
+                                        <Client username={client.username} />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
 
-                {/* Bottom Actions */}
+                {/* Sidebar Bottom Actions */}
                 <div className="mt-auto p-6 space-y-3 border-t border-white/5 bg-black/20">
                     <button
                         onClick={copyRoomId}
@@ -182,22 +184,22 @@ const EditorPageContent = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col relative">
+            {/* --- MAIN CONTENT AREA --- */}
+            <main className="flex-1 flex flex-col h-full overflow-hidden">
 
-                {/* High-End Header */}
-                <header className="h-14 bg-[#0A0A0F]/50 backdrop-blur-md border-b border-white/5 flex items-center px-6 justify-between z-10">
+                {/* Fixed Top Bar */}
+                <header className="h-14 bg-[#0A0A0F]/50 backdrop-blur-md border-b border-white/5 flex items-center px-6 justify-between shrink-0 z-10">
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                             <Code2 size={14} className="text-blue-400" />
                             <span className="text-xs font-mono text-slate-300 tracking-tight">
-                                main.{language.ext}
+                                main.{language.ext} — <span className="text-slate-500">Editing</span>
                             </span>
                         </div>
                         <div className="h-4 w-[1px] bg-white/10" />
                         <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium italic">
                             <Sparkles size={12} className="text-yellow-500/50" />
-                            Auto-saving to cloud...
+                            P2P Sync Active
                         </div>
                     </div>
 
@@ -214,18 +216,21 @@ const EditorPageContent = () => {
                             </select>
                             <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
                         </div>
-
                         <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-                            <Play size={14} fill="currentColor" /> Run
+                            <Play size={14} fill="currentColor" /> Run Code
                         </button>
                     </div>
                 </header>
 
-                {/* Editor Area */}
-                <div className="flex-1 relative group">
+                {/* Editor Container - flex-1 + min-h-0 is the layout fix */}
+                <div className="flex-1 relative min-h-0 w-full bg-[#0D0D14]">
 
-                    {/* Floating High-Budget Toolbar */}
-                    <div className="absolute top-4 right-6 z-50 flex items-center gap-4 bg-[#16161E]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-2xl transition-all opacity-40 group-hover:opacity-100 hover:border-white/20">
+                    {/* Floating Toolbar */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute top-4 right-6 z-50 flex items-center gap-4 bg-[#16161E]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-2xl transition-all hover:border-white/20"
+                    >
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => setFontSize(s => Math.max(10, s - 1))}
@@ -251,24 +256,24 @@ const EditorPageContent = () => {
                             onClick={() => {
                                 const code = (window as any).__cosync_code__ ?? '';
                                 navigator.clipboard.writeText(code);
-                                toast.success('Code copied to clipboard');
+                                toast.success('Code copied!');
                             }}
                             className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors"
                         >
                             <Share2 size={14} className="text-blue-400" />
-                            Share Code
+                            Copy
                         </button>
-                    </div>
+                    </motion.div>
 
-                    {/* The actual Editor component */}
-                    <div className="h-full w-full bg-[#0D0D14]">
+                    {/* The Editor itself */}
+                    <div className="h-full w-full">
                         <Editor
                             socketRef={socketRef}
                             roomId={roomId}
                             username={username}
                             language={language}
                             fontSize={fontSize}
-                            onCodeChange={(code) => {
+                            onCodeChange={(code: string) => {
                                 (window as any).__cosync_code__ = code;
                             }}
                         />
