@@ -15,6 +15,7 @@ import {
 
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), { ssr: false });
+const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
 const LANGUAGES = [
     { label: 'JavaScript', mode: 'javascript', ext: 'js' },
@@ -115,6 +116,13 @@ const EditorPageContent = () => {
 
             {/* --- SIDEBAR --- */}
             <aside className="w-80 h-full bg-[#0A0A0F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-20 shadow-2xl shrink-0">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <motion.div
+                        animate={{ translateY: ['-100%', '200%'] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                        className="w-full h-40 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent opacity-50"
+                    />
+                </div>
                 {/* Logo Section */}
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-8">
@@ -221,17 +229,90 @@ const EditorPageContent = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="relative group">
-                            <select
-                                value={language.label}
-                                onChange={handleLanguageChange}
-                                className="appearance-none bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500/50 cursor-pointer transition-all"
+                        {/* --- CUSTOM PREMIUM DROPDOWN --- */}
+                        {/* --- CUSTOM PREMIUM DROPDOWN --- */}
+                        <div className="relative">
+                            {/* Trigger Button */}
+                            <button
+                                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 border group ${isLangMenuOpen
+                                    ? 'bg-blue-600/10 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                                    }`}
                             >
-                                {LANGUAGES.map(l => (
-                                    <option key={l.label} value={l.label} className="bg-[#0A0A0F]">{l.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
+                                <div className="flex flex-col items-start">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter leading-none mb-1">
+                                        Language
+                                    </span>
+                                    <span className="text-xs font-bold text-white font-mono leading-none">
+                                        {language.label}
+                                    </span>
+                                </div>
+                                <motion.div
+                                    animate={{ rotate: isLangMenuOpen ? 180 : 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                >
+                                    <ChevronDown size={16} className={isLangMenuOpen ? 'text-blue-400' : 'text-slate-500'} />
+                                </motion.div>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            <AnimatePresence>
+                                {isLangMenuOpen && (
+                                    <>
+                                        {/* Overlay to close menu when clicking outside */}
+                                        <div
+                                            className="fixed inset-0 z-[60]"
+                                            onClick={() => setIsLangMenuOpen(false)}
+                                        />
+
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(4px)" }}
+                                            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(4px)" }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                            className="absolute right-0 mt-3 w-56 bg-[#12121A]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.7)] z-[70] overflow-hidden p-2"
+                                        >
+                                            <div className="px-3 py-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">
+                                                Select Environment
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                {LANGUAGES.map((l) => {
+                                                    const isActive = language.label === l.label;
+                                                    return (
+                                                        <button
+                                                            key={l.label}
+                                                            onClick={() => {
+                                                                handleLanguageChange({ target: { value: l.label } } as any);
+                                                                setIsLangMenuOpen(false);
+                                                            }}
+                                                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all group/item ${isActive
+                                                                ? 'bg-blue-600/20 text-blue-400'
+                                                                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${isActive
+                                                                    ? 'bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,1)] scale-125'
+                                                                    : 'bg-slate-600 group-hover/item:bg-slate-400'
+                                                                    }`} />
+                                                                {l.label}
+                                                            </div>
+
+                                                            {isActive && (
+                                                                <motion.div layoutId="activeHighlight">
+                                                                    <Sparkles size={12} className="text-blue-400 opacity-50" />
+                                                                </motion.div>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </motion.div>
+                                    </>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         <button className="relative group overflow-hidden bg-blue-600 hover:bg-blue-500 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.2)] active:scale-95 flex items-center gap-2">
