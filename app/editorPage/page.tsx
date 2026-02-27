@@ -109,13 +109,12 @@ const EditorPageContent = () => {
     return (
         <div className="h-screen w-screen overflow-hidden bg-[#050508] text-slate-300 font-sans selection:bg-blue-500/30 flex">
 
-            {/* Background Decorative Glows - Non-interactive */}
+            {/* Background Decorative Glows */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none" />
 
             {/* --- SIDEBAR --- */}
             <aside className="w-80 h-full bg-[#0A0A0F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-20 shadow-2xl shrink-0">
-                {/* Logo Section */}
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="relative">
@@ -138,7 +137,6 @@ const EditorPageContent = () => {
                         </div>
                     </div>
 
-                    {/* Collaborators Section */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2 text-slate-400">
@@ -148,9 +146,8 @@ const EditorPageContent = () => {
                             <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-mono text-slate-500">{clients.length} online</span>
                         </div>
 
-                        {/* Independent Scroll for User List */}
                         <div className="space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
-                            <AnimatePresence>
+                            <AnimatePresence mode="popLayout">
                                 {clients.map((client) => (
                                     <motion.div
                                         initial={{ opacity: 0, x: -10 }}
@@ -166,19 +163,11 @@ const EditorPageContent = () => {
                     </div>
                 </div>
 
-                {/* Sidebar Bottom Actions */}
                 <div className="mt-auto p-6 space-y-3 border-t border-white/5 bg-black/20">
-                    <button
-                        onClick={copyRoomId}
-                        className="w-full flex items-center justify-center gap-2 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 py-2.5 rounded-xl transition-all border border-white/5 text-sm font-semibold active:scale-[0.98]"
-                    >
+                    <button onClick={copyRoomId} className="w-full flex items-center justify-center gap-2 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 py-2.5 rounded-xl transition-all border border-white/5 text-sm font-semibold active:scale-[0.98]">
                         <Copy size={16} className="opacity-60" /> Copy Room Link
                     </button>
-
-                    <button
-                        onClick={() => { clearSession(); router.push('/'); }}
-                        className="w-full flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white py-2.5 rounded-xl transition-all text-sm font-semibold active:scale-[0.98] group"
-                    >
+                    <button onClick={() => { clearSession(); router.push('/'); }} className="w-full flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white py-2.5 rounded-xl transition-all text-sm font-semibold active:scale-[0.98] group">
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> Leave Session
                     </button>
                 </div>
@@ -187,19 +176,13 @@ const EditorPageContent = () => {
             {/* --- MAIN CONTENT AREA --- */}
             <main className="flex-1 flex flex-col h-full overflow-hidden">
 
-                {/* Fixed Top Bar */}
                 <header className="h-14 bg-[#0A0A0F]/50 backdrop-blur-md border-b border-white/5 flex items-center px-6 justify-between shrink-0 z-10">
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                             <Code2 size={14} className="text-blue-400" />
                             <span className="text-xs font-mono text-slate-300 tracking-tight">
-                                main.{language.ext} — <span className="text-slate-500">Editing</span>
+                                main.{language.ext}
                             </span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-white/10" />
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium italic">
-                            <Sparkles size={12} className="text-yellow-500/50" />
-                            P2P Sync Active
                         </div>
                     </div>
 
@@ -208,7 +191,7 @@ const EditorPageContent = () => {
                             <select
                                 value={language.label}
                                 onChange={handleLanguageChange}
-                                className="appearance-none bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer transition-all"
+                                className="appearance-none bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none cursor-pointer transition-all"
                             >
                                 {LANGUAGES.map(l => (
                                     <option key={l.label} value={l.label} className="bg-[#0A0A0F]">{l.label}</option>
@@ -216,57 +199,30 @@ const EditorPageContent = () => {
                             </select>
                             <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
                         </div>
-                        <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-                            <Play size={14} fill="currentColor" /> Run Code
+                        <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                            Run
                         </button>
                     </div>
                 </header>
 
-                {/* Editor Container - flex-1 + min-h-0 is the layout fix */}
-                <div className="flex-1 relative min-h-0 w-full bg-[#0D0D14]">
+                {/* THE FIX: Wrapper is relative, Editor is absolute inset-0 */}
+                <div className="flex-1 relative w-full bg-[#0D0D14] overflow-hidden">
 
                     {/* Floating Toolbar */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-4 right-6 z-50 flex items-center gap-4 bg-[#16161E]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-2xl transition-all hover:border-white/20"
-                    >
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="absolute top-4 right-6 z-50 flex items-center gap-4 bg-[#16161E]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-2xl">
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setFontSize(s => Math.max(10, s - 1))}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 transition-colors"
-                            >
-                                <span className="text-lg leading-none">−</span>
-                            </button>
-                            <div className="flex flex-col items-center min-w-[20px]">
-                                <span className="text-[10px] text-slate-500 font-bold uppercase">Size</span>
-                                <span className="text-xs font-mono font-bold text-blue-400">{fontSize}</span>
-                            </div>
-                            <button
-                                onClick={() => setFontSize(s => Math.min(28, s + 1))}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 transition-colors"
-                            >
-                                <span className="text-lg leading-none">+</span>
-                            </button>
+                            <button onClick={() => setFontSize(s => Math.max(10, s - 1))} className="text-slate-400 hover:text-white transition-colors">−</button>
+                            <span className="text-xs font-mono font-bold text-blue-400">{fontSize}</span>
+                            <button onClick={() => setFontSize(s => Math.min(28, s + 1))} className="text-slate-400 hover:text-white transition-colors">+</button>
                         </div>
-
                         <div className="w-[1px] h-6 bg-white/10" />
-
-                        <button
-                            onClick={() => {
-                                const code = (window as any).__cosync_code__ ?? '';
-                                navigator.clipboard.writeText(code);
-                                toast.success('Code copied!');
-                            }}
-                            className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors"
-                        >
-                            <Share2 size={14} className="text-blue-400" />
-                            Copy
+                        <button onClick={() => { navigator.clipboard.writeText((window as any).__cosync_code__ ?? ''); toast.success('Copied!'); }} className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">
+                            <Share2 size={14} className="text-blue-400" /> Copy
                         </button>
                     </motion.div>
 
-                    {/* The Editor itself */}
-                    <div className="h-full w-full">
+                    {/* THE NUCLEAR FIX: Absolute positioning forces Editor into the box */}
+                    <div className="absolute inset-0">
                         <Editor
                             socketRef={socketRef}
                             roomId={roomId}

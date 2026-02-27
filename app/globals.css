@@ -3,7 +3,9 @@
 body {
   margin: 0;
   background: black;
-  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent horizontal scroll on mobile */
 }
 
 /* Mobile-first responsive improvements */
