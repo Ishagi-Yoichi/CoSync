@@ -23,6 +23,8 @@ export const saveSession = (roomId: string, username: string) => {
 export const getSession = (): CoSyncSession | null => {
     try {
         const raw = localStorage.getItem(SESSION_KEY);
+
+
         if (!raw) return null;
         const session: CoSyncSession = JSON.parse(raw);
         // Expire after 24 hours
