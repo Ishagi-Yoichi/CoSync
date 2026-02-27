@@ -115,6 +115,7 @@ const EditorPageContent = () => {
 
             {/* --- SIDEBAR --- */}
             <aside className="w-80 h-full bg-[#0A0A0F]/80 backdrop-blur-xl border-r border-white/5 flex flex-col z-20 shadow-2xl shrink-0">
+                {/* Logo Section */}
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="relative">
@@ -137,6 +138,7 @@ const EditorPageContent = () => {
                         </div>
                     </div>
 
+                    {/* Collaborators Section */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2 text-slate-400">
@@ -146,13 +148,16 @@ const EditorPageContent = () => {
                             <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-mono text-slate-500">{clients.length} online</span>
                         </div>
 
-                        <div className="space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+                        {/* Independent Scroll for User List with smooth layout transitions */}
+                        <div className="space-y-2 max-h-[45vh] overflow-y-auto custom-scrollbar pr-2">
                             <AnimatePresence mode="popLayout">
                                 {clients.map((client) => (
                                     <motion.div
-                                        initial={{ opacity: 0, x: -10 }}
+                                        layout
+                                        initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        exit={{ opacity: 0, scale: 0.9, x: -20 }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                         key={client.socketId}
                                     >
                                         <Client username={client.username} />
@@ -163,26 +168,55 @@ const EditorPageContent = () => {
                     </div>
                 </div>
 
-                <div className="mt-auto p-6 space-y-3 border-t border-white/5 bg-black/20">
-                    <button onClick={copyRoomId} className="w-full flex items-center justify-center gap-2 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 py-2.5 rounded-xl transition-all border border-white/5 text-sm font-semibold active:scale-[0.98]">
-                        <Copy size={16} className="opacity-60" /> Copy Room Link
-                    </button>
-                    <button onClick={() => { clearSession(); router.push('/'); }} className="w-full flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white py-2.5 rounded-xl transition-all text-sm font-semibold active:scale-[0.98] group">
-                        <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> Leave Session
-                    </button>
+                {/* Sidebar Bottom: Identity & Actions */}
+                <div className="mt-auto border-t border-white/5 bg-black/40 p-4">
+                    {/* User Identity Mockup */}
+                    <div className="flex items-center gap-3 p-3 mb-4 rounded-xl bg-white/[0.02] border border-white/5">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+                            {username.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white tracking-tight">{username}</span>
+                            <span className="text-[10px] text-slate-500 font-medium">Session Owner</span>
+                        </div>
+                        <div className="ml-auto">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={copyRoomId}
+                            className="flex items-center justify-center gap-2 bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 py-2 rounded-lg transition-all border border-white/5 text-xs font-semibold active:scale-95"
+                        >
+                            <Copy size={14} /> Link
+                        </button>
+                        <button
+                            onClick={() => { clearSession(); router.push('/'); }}
+                            className="flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white py-2 rounded-lg transition-all text-xs font-semibold active:scale-95"
+                        >
+                            <LogOut size={14} /> Leave
+                        </button>
+                    </div>
                 </div>
             </aside>
 
             {/* --- MAIN CONTENT AREA --- */}
             <main className="flex-1 flex flex-col h-full overflow-hidden">
 
+                {/* Modern Header */}
                 <header className="h-14 bg-[#0A0A0F]/50 backdrop-blur-md border-b border-white/5 flex items-center px-6 justify-between shrink-0 z-10">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                        <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 group cursor-default transition-colors hover:border-blue-500/30">
                             <Code2 size={14} className="text-blue-400" />
                             <span className="text-xs font-mono text-slate-300 tracking-tight">
                                 main.{language.ext}
                             </span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-white/10" />
+                        <div className="hidden md:flex items-center gap-2 text-[11px] text-slate-500 font-medium tracking-wide">
+                            <Sparkles size={12} className="text-yellow-500/50" />
+                            REAL-TIME SYNC ON
                         </div>
                     </div>
 
@@ -191,7 +225,7 @@ const EditorPageContent = () => {
                             <select
                                 value={language.label}
                                 onChange={handleLanguageChange}
-                                className="appearance-none bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none cursor-pointer transition-all"
+                                className="appearance-none bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500/50 cursor-pointer transition-all"
                             >
                                 {LANGUAGES.map(l => (
                                     <option key={l.label} value={l.label} className="bg-[#0A0A0F]">{l.label}</option>
@@ -199,29 +233,60 @@ const EditorPageContent = () => {
                             </select>
                             <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
                         </div>
-                        <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-                            Run
+
+                        <button className="relative group overflow-hidden bg-blue-600 hover:bg-blue-500 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.2)] active:scale-95 flex items-center gap-2">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <Play size={14} fill="currentColor" />
+                            Run Code
                         </button>
                     </div>
                 </header>
 
-                {/* THE FIX: Wrapper is relative, Editor is absolute inset-0 */}
+                {/* Editor Area */}
                 <div className="flex-1 relative w-full bg-[#0D0D14] overflow-hidden">
 
-                    {/* Floating Toolbar */}
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="absolute top-4 right-6 z-50 flex items-center gap-4 bg-[#16161E]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-2xl">
+                    {/* Floating Toolbar with Framer Motion */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="absolute top-4 right-8 z-50 flex items-center gap-4 bg-[#16161E]/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                    >
                         <div className="flex items-center gap-3">
-                            <button onClick={() => setFontSize(s => Math.max(10, s - 1))} className="text-slate-400 hover:text-white transition-colors">−</button>
-                            <span className="text-xs font-mono font-bold text-blue-400">{fontSize}</span>
-                            <button onClick={() => setFontSize(s => Math.min(28, s + 1))} className="text-slate-400 hover:text-white transition-colors">+</button>
+                            <button
+                                onClick={() => setFontSize(s => Math.max(10, s - 1))}
+                                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                            >
+                                <span className="text-lg leading-none">−</span>
+                            </button>
+                            <div className="flex flex-col items-center">
+                                <span className="text-[9px] text-slate-500 font-black uppercase tracking-tighter leading-none mb-0.5">SIZE</span>
+                                <span className="text-xs font-mono font-bold text-blue-400 leading-none">{fontSize}</span>
+                            </div>
+                            <button
+                                onClick={() => setFontSize(s => Math.min(28, s + 1))}
+                                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                            >
+                                <span className="text-lg leading-none">+</span>
+                            </button>
                         </div>
+
                         <div className="w-[1px] h-6 bg-white/10" />
-                        <button onClick={() => { navigator.clipboard.writeText((window as any).__cosync_code__ ?? ''); toast.success('Copied!'); }} className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">
-                            <Share2 size={14} className="text-blue-400" /> Copy
+
+                        <button
+                            onClick={() => {
+                                const code = (window as any).__cosync_code__ ?? '';
+                                navigator.clipboard.writeText(code);
+                                toast.success('Ready to share!');
+                            }}
+                            className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+                        >
+                            <Share2 size={14} className="text-blue-400" />
+                            Share
                         </button>
                     </motion.div>
 
-                    {/* THE NUCLEAR FIX: Absolute positioning forces Editor into the box */}
+                    {/* Fixed Editor Wrapper */}
                     <div className="absolute inset-0">
                         <Editor
                             socketRef={socketRef}
