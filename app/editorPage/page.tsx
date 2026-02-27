@@ -62,6 +62,12 @@ const EditorPageContent = () => {
             if (joinedUser !== username) toast.success(`${joinedUser} joined!`);
         });
 
+        socket.on('session_taken_over', () => {
+            toast('This session was opened in another tab', { icon: '⚠️' });
+            clearSession();
+            router.replace('/home');
+        });
+
         socket.on(ACTIONS.DISCONNECTED, ({ username: leftUser, socketId }: any) => {
             toast(`${leftUser} left the room`, { icon: '👋' });
             setClients((prev) => prev.filter(c => c.socketId !== socketId));

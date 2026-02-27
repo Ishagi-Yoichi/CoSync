@@ -187,8 +187,25 @@ io.on("connection", (socket: any) => {
   console.log("socket connected", socket.id);
 
   socket.on(ACTIONS.JOIN, ({ roomId, username }: JoinData) => {
+    // Check if username already exists in this room
+    const existingClients = getAllConnectedClients(roomId);
+    const duplicate = existingClients.find(
+      (c) => userSocketMap[c.socketId] === username && c.socketId !== socket.id
+    );
+
+    if (duplicate) {
+      // Disconnect the OLD socket — new tab takes over
+      io.to(duplicate.socketId).emit("session_taken_over");
+      const oldSocket = io.sockets.sockets.get(duplicate.socketId);
+      if (oldSocket) {
+        oldSocket.leave(roomId);
+        delete userSocketMap[duplicate.socketId];
+      }
+    }
+
     userSocketMap[socket.id] = username;
     socket.join(roomId);
+
     const clients = getAllConnectedClients(roomId);
     clients.forEach(({ socketId }) => {
       io.to(socketId).emit(ACTIONS.JOINED, {
@@ -197,10 +214,12 @@ io.on("connection", (socket: any) => {
         socketId: socket.id,
       });
     });
+
+    // Sync new joiner
     const existingClient = clients.find((c) => c.socketId !== socket.id);
     if (existingClient) {
       io.to(existingClient.socketId).emit(ACTIONS.REQUEST_SYNC, {
-        requesterId: socket.id, // who needs the state
+        requesterId: socket.id,
       });
     }
   });

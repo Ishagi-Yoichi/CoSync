@@ -47,14 +47,16 @@ const Home = () => {
 
     useEffect(() => {
         const session = getSession();
+        const dismissed = sessionStorage.getItem('cosync_dismissed');
+        if (session && !dismissed) {
+            router.replace(`/editorPage?roomId=${session.roomId}&username=${encodeURIComponent(session.username)}`);
+            return;
+        }
+
         if (session) {
             setExistingSession(session);
-            // Pre-fill the form with last used values
             setRoomId(session.roomId);
             setUsername(session.username);
-            if (window.history.length <= 1) {
-                router.replace(`/editorPage?roomId=${session.roomId}&username=${encodeURIComponent(session.username)}`);
-            }
         }
         setChecking(false);
     }, []);
@@ -84,6 +86,7 @@ const Home = () => {
     };
 
     const dismissSession = () => {
+        sessionStorage.setItem('cosync_dismissed', 'true'); // only persists for this tab's lifetime
         clearSession();
         setExistingSession(null);
         setRoomId('');
