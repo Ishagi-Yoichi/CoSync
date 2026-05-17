@@ -3,7 +3,9 @@
 body {
   margin: 0;
   background: black;
-  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent horizontal scroll on mobile */
 }
 
 /* Mobile-first responsive improvements */
@@ -29,11 +31,11 @@ body {
   .CodeMirror {
     font-size: 12px !important;
   }
-  
+
   .CodeMirror-lines {
     padding: 8px 4px !important;
   }
-  
+
   .CodeMirror-gutters {
     padding-right: 4px !important;
   }
@@ -55,3 +57,20 @@ html {
   }
 }
 
+.remote-caret {
+  position: relative;
+  border-left: 2px solid;
+  height: 1.2em;
+}
+
+.remote-caret > div {
+  position: absolute;
+  top: -1.5em;
+  left: -2px;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: white;
+  white-space: nowrap;
+  z-index: 10;
+}

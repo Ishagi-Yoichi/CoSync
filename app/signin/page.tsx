@@ -36,7 +36,7 @@ function SignInForm() {
   }
 
   return (
-    
+
     <div className="h-screen flex justify-center items-center bg-black">
       <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-2xl shadow">
         <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
@@ -76,7 +76,7 @@ function SignInForm() {
             Sign In
           </button>
           <button
-            onClick={()=>signIn('google',{callbackUrl:'/'})}
+            onClick={() => signIn('google', { callbackUrl: '/' })}
             className={`mt-4 w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}
           >
             <span className="inline-flex items-center justify-center gap-2">
@@ -90,7 +90,7 @@ function SignInForm() {
         </form>
       </div>
     </div>
-    
+
   );
 }
 export default function SignInPage() {
