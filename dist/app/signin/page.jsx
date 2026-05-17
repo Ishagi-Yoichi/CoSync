@@ -1,11 +1,14 @@
 'use client';
+import google_png from "@/assets/icons8-google-logo-48.png";
+import Image from 'next/image';
 import { Suspense } from "react";
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Geist } from 'next/font/google';
+import Link from 'next/link';
 const geist = Geist({ subsets: ['latin'] });
-export function SignInForm() {
+function SignInForm() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,8 +31,8 @@ export function SignInForm() {
             router.push((res === null || res === void 0 ? void 0 : res.url) || callbackUrl || '/'); // redirect to home/dashboard
         }
     }
-    return (<div className="h-screen flex justify-center items-center bg-pink-50">
-      <div className="block max-w-sm p-6 bg-white border border-pink-200 rounded-2xl shadow">
+    return (<div className="h-screen flex justify-center items-center bg-black">
+      <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-2xl shadow">
         <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
           Sign In
         </div>
@@ -46,9 +49,18 @@ export function SignInForm() {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <button type="submit" className={`mt-4 w-full text-white bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}>
+          <button type="submit" className={`mt-4 w-full text-white bg-gray-900 hover:bg-gray-800 focus:ring-4 focus:ring-gray-600 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}>
             Sign In
           </button>
+          <button onClick={() => signIn('google', { callbackUrl: '/' })} className={`mt-4 w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}>
+            <span className="inline-flex items-center justify-center gap-2">
+              <span>Sign In with</span>
+              <Image src={google_png} alt="Google" width={28} height={28}/>
+            </span>
+          </button>
+          <h1 className="text-center text-sm text-gray-600 mt-4">
+            Don't have an account? <Link href="/signup" className="text-blue-600 hover:text-blue-800 underline">SignUp Now</Link>
+          </h1>
         </form>
       </div>
     </div>);

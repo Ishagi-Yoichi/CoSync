@@ -9,7 +9,7 @@ import { Geist } from 'next/font/google';
 import Link from 'next/link';
 const geist = Geist({ subsets: ['latin'] });
 
-export function SignInForm() {
+function SignInForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

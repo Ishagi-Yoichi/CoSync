@@ -84,10 +84,10 @@ export const Cover = ({ children, className, }) => {
         }} className={cn("dark:text-white inline-block text-neutral-900 relative z-20 group-hover/cover:text-white transition duration-200", className)}>
         {children}
       </motion.span>
-      <CircleIcon className="absolute -right-[2px] -top-[2px]"/>
-      <CircleIcon className="absolute -bottom-[2px] -right-[2px]" delay={0.4}/>
-      <CircleIcon className="absolute -left-[2px] -top-[2px]" delay={0.8}/>
-      <CircleIcon className="absolute -bottom-[2px] -left-[2px]" delay={1.6}/>
+      {/* <CircleIcon className="absolute -right-[2px] -top-[2px]" />
+        <CircleIcon className="absolute -bottom-[2px] -right-[2px]" delay={0.4} />
+        <CircleIcon className="absolute -left-[2px] -top-[2px]" delay={0.8} />
+        <CircleIcon className="absolute -bottom-[2px] -left-[2px]" delay={1.6} /> */}
     </div>);
 };
 export const Beam = (_a) => {

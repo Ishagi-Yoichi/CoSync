@@ -3,8 +3,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 export const HoverEffect = ({ items, className, }) => {
     let [hoveredIndex, setHoveredIndex] = useState(null);
-    return (<div className={cn("grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 py-10", className)}>
-      {items.map((item, idx) => (<a href={item === null || item === void 0 ? void 0 : item.link} key={item === null || item === void 0 ? void 0 : item.link} className="relative group  block p-2 h-full w-full" onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)}>
+    return (<section>
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-white relative w-fit mx-auto mt-8 sm:mt-10 px-4">
+          Why CodeSync?
+          <span className="absolute left-0 -bottom-1 h-[2.5px] w-full bg-blue-500 rounded-full shadow-[0_0_15px_5px_rgba(59,130,246,0.5)] animate-ping"></span>
+      </h2>
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-6 sm:py-10 px-4 gap-4 sm:gap-6", className)}>
+      {items.map((item, idx) => (<a href={item === null || item === void 0 ? void 0 : item.link} key={item === null || item === void 0 ? void 0 : item.link} className="relative group block p-1 sm:p-2 h-full w-full" onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)}>
           <AnimatePresence>
             {hoveredIndex === idx && (<motion.span className="absolute inset-0 h-full w-full bg-blue-400 dark:bg-slate-800/[0.8] block  rounded-3xl" layoutId="hoverBackground" initial={{ opacity: 0 }} animate={{
                     opacity: 1,
@@ -19,22 +24,23 @@ export const HoverEffect = ({ items, className, }) => {
             <CardDescription>{item.description}</CardDescription>
           </Card>
         </a>))}
-    </div>);
+    </div>
+    </section>);
 };
 export const Card = ({ className, children, }) => {
-    return (<div className={cn("rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-white  dark:border-white/[0.2] group-hover:border-slate-700 relative z-20", className)}>
+    return (<div className={cn("rounded-2xl h-full w-full p-3 sm:p-4 overflow-hidden bg-black border border-white dark:border-white/[0.2] group-hover:border-slate-700 relative z-20", className)}>
       <div className="relative z-50">
-        <div className="p-4">{children}</div>
+        <div className="p-2 sm:p-4">{children}</div>
       </div>
     </div>);
 };
 export const CardTitle = ({ className, children, }) => {
-    return (<h4 className={cn("text-zinc-100 font-bold tracking-wide mt-4", className)}>
+    return (<h4 className={cn("text-zinc-100 font-bold tracking-wide mt-2 sm:mt-4 text-sm sm:text-base", className)}>
       {children}
     </h4>);
 };
 export const CardDescription = ({ className, children, }) => {
-    return (<p className={cn("mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm", className)}>
+    return (<p className={cn("mt-4 sm:mt-8 text-zinc-400 tracking-wide leading-relaxed text-xs sm:text-sm", className)}>
       {children}
     </p>);
 };

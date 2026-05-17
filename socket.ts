@@ -6,14 +6,17 @@ let socket: Socket | null = null;
 export const initSocket = () => {
     if(!socket){
     const options = {
-        forceNew: true,
-        reconnectionAttempts: 5,
+        autoConnect: false,
+        reconnection: true,
+        reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        timeout: 20000,
+        randomizationFactor: 0.5,
+        timeout: 10000,
         transports: ['websocket', 'polling'],
         upgrade: true,
         rememberUpgrade: true,
+        withCredentials: true,
     };
     const serverUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
    

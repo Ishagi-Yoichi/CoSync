@@ -1,13 +1,35 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { DotBackgroundDemo } from '@/components/Dotbg';
+const ROOM_SESSION_KEY = 'cosync-room-session';
 const Home = () => {
     const router = useRouter();
     const [roomId, setRoomId] = useState('');
     const [username, setUsername] = useState('');
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const rawSession = window.sessionStorage.getItem(ROOM_SESSION_KEY);
+        if (!rawSession) {
+            return;
+        }
+        try {
+            const session = JSON.parse(rawSession);
+            if (session.roomId) {
+                setRoomId(session.roomId);
+            }
+            if (session.username) {
+                setUsername(session.username);
+            }
+        }
+        catch (error) {
+            console.error('Failed to restore room session', error);
+        }
+    }, []);
     const createNewRoom = () => {
         const id = uuidV4();
         setRoomId(id);
@@ -18,6 +40,10 @@ const Home = () => {
             toast.error('ROOM ID & username is required');
             return;
         }
+        window.sessionStorage.setItem(ROOM_SESSION_KEY, JSON.stringify({
+            roomId,
+            username,
+        }));
         router.push(`/editorPage?roomId=${roomId}&username=${encodeURIComponent(username)}`);
     };
     const handleInputEnter = (e) => {
@@ -26,10 +52,10 @@ const Home = () => {
         }
     };
     return (<DotBackgroundDemo>
-            <div className='flex flex-col items-center justify-center h-screen'>
-                <div className='bg-white/95 backdrop-blur-sm w-96 h-auto rounded-2xl shadow-2xl border border-white/20 p-8'>
-                    <div className='text-center mb-8'>
-                        <h2 className='text-2xl font-bold text-gray-800 mb-2'>Join a Room</h2>
+            <div className='flex flex-col items-center justify-center min-h-screen p-4'>
+                <div className='bg-white/95 backdrop-blur-sm w-full max-w-md sm:max-w-lg h-auto rounded-2xl shadow-2xl border border-white/20 p-6 sm:p-8'>
+                    <div className='text-center mb-6 sm:mb-8'>
+                        <h2 className='text-xl sm:text-2xl font-bold text-gray-800 mb-2'>Join a Room</h2>
                         <p className='text-gray-600 text-sm'>Enter your room ID and username to get started</p>
                     </div>
                     
@@ -52,7 +78,7 @@ const Home = () => {
                     <div className='mt-8 text-center'>
                         <p className='text-gray-600 text-sm mb-4'>Don't have a room? Create one!</p>
                         <button onClick={createNewRoom} className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                            Create New Room
+                            Create Room ID
                         </button>
                     </div>
                 </div>

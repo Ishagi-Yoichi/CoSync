@@ -1,5 +1,4 @@
 'use client';
-import { prisma } from "@/lib/prisma";
 import { Suspense } from "react";
 import { Geist } from 'next/font/google';
 import { useRouter,useSearchParams } from 'next/navigation';
@@ -7,7 +6,7 @@ import { useState } from 'react';
 
 const geist = Geist({ subsets: ['latin'] });
 
-export  function SignUpForm() {
+function SignUpForm() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

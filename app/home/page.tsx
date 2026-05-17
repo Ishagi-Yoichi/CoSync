@@ -1,15 +1,40 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { DotBackgroundDemo } from '@/components/Dotbg';
+
+const ROOM_SESSION_KEY = 'cosync-room-session';
 
 const Home = () => {
     const router = useRouter();
 
     const [roomId, setRoomId] = useState('');
     const [username, setUsername] = useState('');
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        const rawSession = window.sessionStorage.getItem(ROOM_SESSION_KEY);
+        if (!rawSession) {
+            return;
+        }
+
+        try {
+            const session = JSON.parse(rawSession) as { roomId?: string; username?: string };
+            if (session.roomId) {
+                setRoomId(session.roomId);
+            }
+            if (session.username) {
+                setUsername(session.username);
+            }
+        } catch (error) {
+            console.error('Failed to restore room session', error);
+        }
+    }, []);
 
     const createNewRoom = () => {
         const id = uuidV4();
@@ -22,6 +47,11 @@ const Home = () => {
             toast.error('ROOM ID & username is required');
             return;
         }
+
+        window.sessionStorage.setItem(ROOM_SESSION_KEY, JSON.stringify({
+            roomId,
+            username,
+        }));
         router.push(`/editorPage?roomId=${roomId}&username=${encodeURIComponent(username)}`);
     };
 

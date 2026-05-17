@@ -7,63 +7,86 @@ import 'codemirror/mode/javascript/javascript';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 const { ACTIONS } = require('../Actions');
-const Editor = ({ socketRef, roomId, onCodeChange }) => {
-    var _a;
+const Editor = ({ socket, roomId, initialCode, onCodeChange, onReady }) => {
     const editorRef = useRef(null);
-    const isInitialized = useRef(false);
+    const textareaRef = useRef(null);
+    const socketRef = useRef(socket);
+    const onCodeChangeRef = useRef(onCodeChange);
+    const onReadyRef = useRef(onReady);
+    const initialCodeRef = useRef(initialCode);
     useEffect(() => {
-        if (isInitialized.current)
+        socketRef.current = socket;
+    }, [socket]);
+    useEffect(() => {
+        onCodeChangeRef.current = onCodeChange;
+        onReadyRef.current = onReady;
+        initialCodeRef.current = initialCode;
+    }, [onCodeChange, onReady]);
+    useEffect(() => {
+        initialCodeRef.current = initialCode;
+    }, [initialCode]);
+    useEffect(() => {
+        var _a;
+        if (!textareaRef.current || editorRef.current) {
             return;
-        async function init() {
-            const textareaElement = document.getElementById('realtimeEditor');
-            if (!textareaElement)
-                return;
-            editorRef.current = Codemirror.fromTextArea(textareaElement, {
-                mode: { name: 'javascript', json: true },
-                theme: 'dracula',
-                autoCloseTags: true,
-                autoCloseBrackets: true,
-                lineNumbers: true,
-            });
-            editorRef.current.on('change', (instance, changes) => {
-                var _a;
-                const { origin } = changes;
-                const code = instance.getValue();
-                onCodeChange(code);
-                if (origin !== 'setValue') {
-                    (_a = socketRef.current) === null || _a === void 0 ? void 0 : _a.emit(ACTIONS.CODE_CHANGE, {
-                        roomId,
-                        code,
-                    });
-                }
-            });
-            isInitialized.current = true;
         }
-        init();
-        return () => {
-            if (editorRef.current) {
-                editorRef.current.toTextArea();
-                editorRef.current = null;
-                isInitialized.current = false;
+        const instance = Codemirror.fromTextArea(textareaRef.current, {
+            mode: { name: 'javascript', json: true },
+            theme: 'dracula',
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            lineNumbers: true,
+        });
+        instance.setSize('100%', '100%');
+        instance.setValue(initialCodeRef.current);
+        onCodeChangeRef.current(initialCodeRef.current);
+        instance.on('change', (editor, changes) => {
+            var _a;
+            const code = editor.getValue();
+            onCodeChangeRef.current(code);
+            if (changes.origin !== 'setValue') {
+                (_a = socketRef.current) === null || _a === void 0 ? void 0 : _a.emit(ACTIONS.CODE_CHANGE, {
+                    roomId,
+                    code,
+                });
             }
+        });
+        editorRef.current = instance;
+        (_a = onReadyRef.current) === null || _a === void 0 ? void 0 : _a.call(onReadyRef);
+        return () => {
+            var _a;
+            (_a = editorRef.current) === null || _a === void 0 ? void 0 : _a.toTextArea();
+            editorRef.current = null;
         };
-    }, [roomId, onCodeChange]);
+    }, [roomId]);
     useEffect(() => {
-        if (socketRef.current) {
-            const handler = ({ code }) => {
-                if (code !== null && editorRef.current) {
-                    editorRef.current.setValue(code);
-                }
-            };
-            socketRef.current.on(ACTIONS.CODE_CHANGE, handler);
-            return () => {
-                var _a;
-                (_a = socketRef.current) === null || _a === void 0 ? void 0 : _a.off(ACTIONS.CODE_CHANGE, handler);
-            };
+        if (!editorRef.current) {
+            return;
         }
-    }, [(_a = socketRef.current) === null || _a === void 0 ? void 0 : _a.connected]);
+        const currentCode = editorRef.current.getValue();
+        if (initialCode !== currentCode) {
+            editorRef.current.setValue(initialCode);
+            onCodeChangeRef.current(initialCode);
+        }
+    }, [initialCode]);
+    useEffect(() => {
+        if (!socket) {
+            return;
+        }
+        const handleCodeChange = ({ code }) => {
+            if (!editorRef.current || code === editorRef.current.getValue()) {
+                return;
+            }
+            editorRef.current.setValue(code);
+            onCodeChangeRef.current(code);
+        };
+        socket.on(ACTIONS.CODE_CHANGE, handleCodeChange);
+        return () => {
+            socket.off(ACTIONS.CODE_CHANGE, handleCodeChange);
+        };
+    }, [socket]);
     return (<div className="h-full w-full">
-            <textarea id="realtimeEditor" className="h-full w-full" style={{ height: '100%', minHeight: '100%' }}></textarea>
+            <textarea ref={textareaRef} id="realtimeEditor" className="h-full w-full" style={{ height: '100%', minHeight: '100%' }} defaultValue={initialCode}/>
         </div>);
 };
 export default Editor;
