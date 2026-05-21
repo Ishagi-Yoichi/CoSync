@@ -1,6 +1,6 @@
 "use client";
 
-import google_png from "../../assets/icons8-google-logo-48.png";
+import google_png from "../../public/icons8-google-logo-48.png";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
