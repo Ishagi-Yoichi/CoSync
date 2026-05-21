@@ -1,27 +1,31 @@
-'use client';
+"use client";
 
-import google_png from "@/assets/icons8-google-logo-48.png";
-import Image from 'next/image';
-import Link from 'next/link';
+import google_png from "../../assets/icons8-google-logo-48.png";
+import Image from "next/image";
+import Link from "next/link";
 import { Suspense, useState } from "react";
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'motion/react';
-import { IconArrowRight, IconLockPassword, IconMail } from '@tabler/icons-react';
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
+import {
+  IconArrowRight,
+  IconLockPassword,
+  IconMail,
+} from "@tabler/icons-react";
 
 function SignInForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/home";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    const res = await signIn('credentials', {
+    const res = await signIn("credentials", {
       redirect: false,
       email,
       password,
@@ -31,7 +35,7 @@ function SignInForm() {
     if (res?.error) {
       setError(res.error);
     } else {
-      router.push(res?.url || callbackUrl || '/');
+      router.push(res?.url || callbackUrl || "/");
     }
   }
 
@@ -49,16 +53,20 @@ function SignInForm() {
             Return to the workspace with a sharper, calmer sign-in flow.
           </h1>
           <p className="mt-5 max-w-lg text-base leading-7 text-slate-300">
-            Access rooms, reconnect with your team, and resume where the session left off.
+            Access rooms, reconnect with your team, and resume where the session
+            left off.
           </p>
 
           <div className="mt-8 space-y-4">
             {[
-              'Room re-entry without friction',
-              'Shared editing and voice in one space',
-              'Premium collaboration UI across every touchpoint',
+              "Room re-entry without friction",
+              "Shared editing and voice in one space",
+              "Premium collaboration UI across every touchpoint",
             ].map((item) => (
-              <div key={item} className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm leading-6 text-slate-200">
+              <div
+                key={item}
+                className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm leading-6 text-slate-200"
+              >
                 {item}
               </div>
             ))}
@@ -71,8 +79,12 @@ function SignInForm() {
           transition={{ duration: 0.55, delay: 0.1 }}
           className="premium-panel-strong premium-glow-border rounded-[34px] p-6 md:p-8"
         >
-          <div className="text-sm uppercase tracking-[0.24em] text-slate-400">Sign In</div>
-          <div className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white">Access your CoSync account</div>
+          <div className="text-sm uppercase tracking-[0.24em] text-slate-400">
+            Sign In
+          </div>
+          <div className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white">
+            Access your CoSync account
+          </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <label className="block">
@@ -117,7 +129,7 @@ function SignInForm() {
 
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
+              onClick={() => signIn("google", { callbackUrl: "/" })}
               className="premium-button premium-button-secondary inline-flex w-full items-center justify-center gap-3"
             >
               <Image src={google_png} alt="Google" width={22} height={22} />
@@ -127,7 +139,10 @@ function SignInForm() {
 
           <p className="mt-8 text-sm text-slate-400">
             No account yet?{" "}
-            <Link href="/signup" className="font-semibold text-[#67e8c8] transition-colors hover:text-white">
+            <Link
+              href="/signup"
+              className="font-semibold text-[#67e8c8] transition-colors hover:text-white"
+            >
               Create one now
             </Link>
           </p>
