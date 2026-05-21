@@ -1,6 +1,4 @@
 "use client";
-
-import google_png from "../../public/icons8-google-logo-48.png";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
@@ -132,7 +130,12 @@ function SignInForm() {
               onClick={() => signIn("google", { callbackUrl: "/" })}
               className="premium-button premium-button-secondary inline-flex w-full items-center justify-center gap-3"
             >
-              <Image src={google_png} alt="Google" width={22} height={22} />
+              <Image
+                src="/icons8-google-logo-48.png"
+                alt="Google"
+                width={22}
+                height={22}
+              />
               Continue with Google
             </button>
           </form>
