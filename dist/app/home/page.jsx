@@ -3,9 +3,27 @@ import React, { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { DotBackgroundDemo } from '@/components/Dotbg';
+import { motion } from 'motion/react';
+import { IconArrowRight, IconBolt, IconCopyPlus, IconHeadphones, IconShieldCheck, } from '@tabler/icons-react';
 const ROOM_SESSION_KEY = 'cosync-room-session';
-const Home = () => {
+const roomBenefits = [
+    {
+        icon: IconBolt,
+        title: 'Instant rooms',
+        copy: 'Spin up a collaborative room in seconds and re-enter it later without friction.',
+    },
+    {
+        icon: IconHeadphones,
+        title: 'Voice built in',
+        copy: 'Talk through edits in the same workspace with active-speaker awareness.',
+    },
+    {
+        icon: IconShieldCheck,
+        title: 'Recovery aware',
+        copy: 'Sessions are optimized for reconnects, room snapshots, and smoother first joins.',
+    },
+];
+export default function Home() {
     const router = useRouter();
     const [roomId, setRoomId] = useState('');
     const [username, setUsername] = useState('');
@@ -33,11 +51,11 @@ const Home = () => {
     const createNewRoom = () => {
         const id = uuidV4();
         setRoomId(id);
-        toast.success('Created a new room');
+        toast.success('Generated a new room ID.');
     };
     const joinRoom = () => {
         if (!roomId || !username) {
-            toast.error('ROOM ID & username is required');
+            toast.error('Room ID and username are both required.');
             return;
         }
         window.sessionStorage.setItem(ROOM_SESSION_KEY, JSON.stringify({
@@ -51,38 +69,85 @@ const Home = () => {
             joinRoom();
         }
     };
-    return (<DotBackgroundDemo>
-            <div className='flex flex-col items-center justify-center min-h-screen p-4'>
-                <div className='bg-white/95 backdrop-blur-sm w-full max-w-md sm:max-w-lg h-auto rounded-2xl shadow-2xl border border-white/20 p-6 sm:p-8'>
-                    <div className='text-center mb-6 sm:mb-8'>
-                        <h2 className='text-xl sm:text-2xl font-bold text-gray-800 mb-2'>Join a Room</h2>
-                        <p className='text-gray-600 text-sm'>Enter your room ID and username to get started</p>
+    return (<main className="premium-shell relative min-h-screen overflow-hidden px-4 py-8 md:px-8 md:py-10">
+            <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+                <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="premium-panel rounded-[34px] p-6 md:p-8">
+                    <div className="premium-kicker">Workspace Access</div>
+                    <h1 className="mt-4 text-5xl font-semibold tracking-[-0.05em] text-white md:text-6xl">
+                        Enter the room with a control panel feel, not a bare form.
+                    </h1>
+                    <p className="mt-5 max-w-xl text-base leading-7 text-slate-300">
+                        Start a new collaboration session or return to a recent one. CoSync keeps the entry flow clean, confident, and production-grade.
+                    </p>
+
+                    <div className="mt-8 grid gap-4">
+                        {roomBenefits.map(({ icon: Icon, title, copy }) => (<div key={title} className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/7 text-[#67e8c8]">
+                                        <Icon className="h-5 w-5"/>
+                                    </div>
+                                    <div>
+                                        <div className="text-lg font-semibold tracking-[-0.03em] text-white">{title}</div>
+                                        <div className="mt-1 text-sm leading-6 text-slate-300">{copy}</div>
+                                    </div>
+                                </div>
+                            </div>))}
                     </div>
-                    
-                    <div className='space-y-4'>
+                </motion.section>
+
+                <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }} className="premium-panel-strong premium-glow-border rounded-[34px] p-6 md:p-8">
+                    <div className="flex items-center justify-between">
                         <div>
-                            <label className='block text-sm font-medium text-gray-700 mb-2'>Room ID</label>
-                            <input type="text" className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500' placeholder='Enter room ID' onChange={(e) => setRoomId(e.target.value)} value={roomId} onKeyUp={handleInputEnter}/>
+                            <div className="text-sm uppercase tracking-[0.24em] text-slate-400">Session Entry</div>
+                            <div className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-white">Open a collaboration room</div>
                         </div>
-                        
-                        <div>
-                            <label className='block text-sm font-medium text-gray-700 mb-2'>Username</label>
-                            <input type="text" className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500' placeholder='Enter your username' onChange={(e) => setUsername(e.target.value)} value={username} onKeyUp={handleInputEnter}/>
-                        </div>
-                        
-                        <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl" onClick={joinRoom}>
-                            Join Room
+                        <button onClick={createNewRoom} className="hidden rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition-colors hover:bg-white/10 md:inline-flex">
+                            Generate ID
                         </button>
                     </div>
-                    
-                    <div className='mt-8 text-center'>
-                        <p className='text-gray-600 text-sm mb-4'>Don't have a room? Create one!</p>
-                        <button onClick={createNewRoom} className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                            Create Room ID
-                        </button>
+
+                    <div className="mt-8 space-y-5">
+                        <div>
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                Room ID
+                            </label>
+                            <input type="text" className="premium-input" placeholder="Paste or generate a room ID" onChange={(e) => setRoomId(e.target.value)} value={roomId} onKeyUp={handleInputEnter}/>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                Display Name
+                            </label>
+                            <input type="text" className="premium-input" placeholder="How the room will see you" onChange={(e) => setUsername(e.target.value)} value={username} onKeyUp={handleInputEnter}/>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <button className="premium-button premium-button-primary inline-flex items-center justify-center gap-2" onClick={joinRoom}>
+                                Join Room
+                                <IconArrowRight className="h-4 w-4"/>
+                            </button>
+                            <button onClick={createNewRoom} className="premium-button premium-button-secondary inline-flex items-center justify-center gap-2 md:hidden">
+                                <IconCopyPlus className="h-4 w-4"/>
+                                Generate ID
+                            </button>
+                        </div>
                     </div>
-                </div>
+
+                    <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                        <div className="premium-stat">
+                            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Audio</div>
+                            <div className="mt-2 text-lg font-semibold text-white">Room-native voice</div>
+                        </div>
+                        <div className="premium-stat">
+                            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Presence</div>
+                            <div className="mt-2 text-lg font-semibold text-white">Live member states</div>
+                        </div>
+                        <div className="premium-stat">
+                            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Recovery</div>
+                            <div className="mt-2 text-lg font-semibold text-white">Persistent session handoff</div>
+                        </div>
+                    </div>
+                </motion.section>
             </div>
-        </DotBackgroundDemo>);
-};
-export default Home;
+        </main>);
+}

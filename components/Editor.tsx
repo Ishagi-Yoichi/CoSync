@@ -5,9 +5,17 @@ import type { Socket } from 'socket.io-client';
 import Codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
-import 'codemirror/mode/javascript/javascript';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
+import 'codemirror/addon/selection/active-line';
+import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/css/css';
+import 'codemirror/mode/htmlmixed/htmlmixed';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/markdown/markdown';
+import 'codemirror/mode/python/python';
+import 'codemirror/mode/sql/sql';
+import type { EditorLanguage } from '../lib/editor-options';
 
 const { ACTIONS } = require('../Actions');
 
@@ -15,11 +23,31 @@ interface EditorProps {
     socket: Socket | null;
     roomId: string;
     initialCode: string;
+    language: EditorLanguage;
+    zoomLevel: number;
     onCodeChange: (code: string) => void;
     onReady?: () => void;
 }
 
-const Editor = ({ socket, roomId, initialCode, onCodeChange, onReady }: EditorProps) => {
+const editorModeByLanguage: Record<EditorLanguage, string> = {
+    javascript: 'javascript',
+    typescript: 'text/typescript',
+    python: 'python',
+    html: 'htmlmixed',
+    css: 'css',
+    markdown: 'markdown',
+    sql: 'sql',
+};
+
+const Editor = ({
+    socket,
+    roomId,
+    initialCode,
+    language,
+    zoomLevel,
+    onCodeChange,
+    onReady,
+}: EditorProps) => {
     const editorRef = useRef<Codemirror.EditorFromTextArea | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const socketRef = useRef<Socket | null>(socket);
@@ -35,11 +63,7 @@ const Editor = ({ socket, roomId, initialCode, onCodeChange, onReady }: EditorPr
         onCodeChangeRef.current = onCodeChange;
         onReadyRef.current = onReady;
         initialCodeRef.current = initialCode;
-    }, [onCodeChange, onReady]);
-
-    useEffect(() => {
-        initialCodeRef.current = initialCode;
-    }, [initialCode]);
+    }, [initialCode, onCodeChange, onReady]);
 
     useEffect(() => {
         if (!textareaRef.current || editorRef.current) {
@@ -47,11 +71,15 @@ const Editor = ({ socket, roomId, initialCode, onCodeChange, onReady }: EditorPr
         }
 
         const instance = Codemirror.fromTextArea(textareaRef.current, {
-            mode: { name: 'javascript', json: true },
+            mode: editorModeByLanguage[language],
             theme: 'dracula',
             autoCloseTags: true,
             autoCloseBrackets: true,
             lineNumbers: true,
+            styleActiveLine: true,
+            lineWrapping: true,
+            indentUnit: 2,
+            tabSize: 2,
         });
 
         instance.setSize('100%', '100%');
@@ -77,7 +105,27 @@ const Editor = ({ socket, roomId, initialCode, onCodeChange, onReady }: EditorPr
             editorRef.current?.toTextArea();
             editorRef.current = null;
         };
-    }, [roomId]);
+    }, [language, roomId]);
+
+    useEffect(() => {
+        const editor = editorRef.current;
+        if (!editor) {
+            return;
+        }
+
+        editor.setOption('mode', editorModeByLanguage[language]);
+    }, [language]);
+
+    useEffect(() => {
+        const editor = editorRef.current;
+        if (!editor) {
+            return;
+        }
+
+        const wrapper = editor.getWrapperElement();
+        wrapper.style.fontSize = `${zoomLevel}%`;
+        editor.refresh();
+    }, [zoomLevel]);
 
     useEffect(() => {
         if (!editorRef.current) {

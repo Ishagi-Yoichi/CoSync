@@ -1,9 +1,9 @@
 'use client';
-import { Suspense } from "react";
-import { Geist } from 'next/font/google';
+import Link from 'next/link';
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-const geist = Geist({ subsets: ['latin'] });
+import { motion } from 'motion/react';
+import { IconArrowRight, IconAt, IconLockPassword, IconUser } from '@tabler/icons-react';
 function SignUpForm() {
     const router = useRouter();
     const [name, setName] = useState('');
@@ -14,6 +14,8 @@ function SignUpForm() {
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/home";
     async function handleSubmit() {
+        setError('');
+        setSuccess('');
         const res = await fetch('/api/auth/signup', {
             method: 'POST',
             body: JSON.stringify({ name, email, password }),
@@ -22,44 +24,84 @@ function SignUpForm() {
         const data = await res.json();
         if (!res.ok) {
             setError(data.message || 'Something went wrong');
+            return;
         }
-        else {
-            router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
-        }
+        setSuccess('Account created successfully. Redirecting to sign in...');
+        router.push(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-    return (<div className="h-screen flex justify-center items-center bg-black">
-      <div className="block max-w-sm p-6 bg-white border border-gray-200 border-solid rounded-2xl shadow">
-        <div className={`text-3xl font-bold mb-4 text-center ${geist.className}`}>
-          Sign Up
-        </div>
-        <div className="flex flex-col space-y-4">
-          <label>
-            Username:
-            <input className="w-full mt-1 p-2 border rounded" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nikunj Tiwari"/>
-          </label>
+    return (<main className="premium-shell relative min-h-screen overflow-hidden px-4 py-8 md:px-8 md:py-10">
+      <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.98fr_1.02fr]">
+        <motion.section initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="premium-panel rounded-[34px] p-6 md:p-8">
+          <div className="premium-kicker">Create Account</div>
+          <h1 className="mt-4 text-5xl font-semibold tracking-[-0.05em] text-white md:text-6xl">
+            Start with a workspace experience that already feels enterprise-grade.
+          </h1>
+          <p className="mt-5 max-w-lg text-base leading-7 text-slate-300">
+            Join CoSync to create rooms, invite collaborators, and work inside a premium multiplayer editor from the first session.
+          </p>
 
-          <label>
-            Email:
-            <input className="w-full mt-1 p-2 border rounded" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nik22@yahoo.com" type="email"/>
-          </label>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {[
+            'Reusable room identity',
+            'Integrated voice collaboration',
+            'Resilient reconnect flow',
+            'Elegant editor workspace',
+        ].map((item) => (<div key={item} className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-5 text-sm font-medium text-slate-100">
+                {item}
+              </div>))}
+          </div>
+        </motion.section>
 
-          <label>
-            Password:
-            <input className="w-full mt-1 p-2 border rounded" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nik22@" type="password"/>
-          </label>
+        <motion.section initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }} className="premium-panel-strong premium-glow-border rounded-[34px] p-6 md:p-8">
+          <div className="text-sm uppercase tracking-[0.24em] text-slate-400">Sign Up</div>
+          <div className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white">Create your CoSync identity</div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          {success && <p className="text-green-600 text-sm">{success}</p>}
+          <div className="mt-8 space-y-5">
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                <IconUser className="h-4 w-4"/>
+                Username
+              </span>
+              <input className="premium-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your display name"/>
+            </label>
 
-          <button type="button" onClick={handleSubmit} className={`mt-4 w-full text-white bg-gray-900 hover:bg-gray-800 focus:ring-4 focus:ring-gray-600 font-medium rounded-3xl text-sm px-5 py-2.5 ${geist.className}`}>
-            Sign Up
-          </button>
-        </div>
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                <IconAt className="h-4 w-4"/>
+                Email
+              </span>
+              <input className="premium-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" type="email"/>
+            </label>
+
+            <label className="block">
+              <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                <IconLockPassword className="h-4 w-4"/>
+                Password
+              </span>
+              <input className="premium-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a secure password" type="password"/>
+            </label>
+
+            {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+            {success ? <p className="text-sm text-emerald-300">{success}</p> : null}
+
+            <button type="button" onClick={handleSubmit} className="premium-button premium-button-primary inline-flex w-full items-center justify-center gap-2">
+              Create Account
+              <IconArrowRight className="h-4 w-4"/>
+            </button>
+          </div>
+
+          <p className="mt-8 text-sm text-slate-400">
+            Already have an account?{" "}
+            <Link href="/signin" className="font-semibold text-[#67e8c8] transition-colors hover:text-white">
+              Sign in
+            </Link>
+          </p>
+        </motion.section>
       </div>
-    </div>);
+    </main>);
 }
 export default function SignUp() {
-    return (<Suspense fallback={<div>Loading...</div>}>
+    return (<Suspense fallback={<div className="min-h-screen bg-[#07111c]"/>}>
       <SignUpForm />
     </Suspense>);
 }

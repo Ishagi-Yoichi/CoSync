@@ -8,7 +8,7 @@ const { ACTIONS } = require('../Actions');
 
 const ICE_SERVERS: RTCIceServer[] = [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
 ];
 
 interface UseRoomAudioProps {
@@ -232,7 +232,15 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
             return existing;
         }
 
-        const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+        let peerConnection: RTCPeerConnection;
+        try {
+            peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+        } catch (error) {
+            console.error('Failed to create RTCPeerConnection for peer', peerId, error);
+            setAudioError('Voice transport setup failed in this browser. Text collaboration is still available.');
+            return null;
+        }
+
         const peerState: PeerState = {
             pc: peerConnection,
             polite: selfSocketIdRef.current.localeCompare(peerId) > 0,
@@ -319,6 +327,9 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
             }
 
             const peerState = createPeer(senderId);
+            if (!peerState) {
+                return;
+            }
             const { pc } = peerState;
             const offerCollision = peerState.makingOffer || pc.signalingState !== 'stable';
             peerState.ignoreOffer = !peerState.polite && offerCollision;
@@ -362,6 +373,9 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
             }
 
             const peerState = createPeer(senderId);
+            if (!peerState) {
+                return;
+            }
 
             try {
                 await peerState.pc.setRemoteDescription(description);
@@ -383,6 +397,9 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
             }
 
             const peerState = createPeer(senderId);
+            if (!peerState) {
+                return;
+            }
 
             try {
                 await peerState.pc.addIceCandidate(candidate);
@@ -443,6 +460,9 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
 
         for (const peerId of activePeerIds) {
             const peerState = createPeer(peerId);
+            if (!peerState) {
+                continue;
+            }
             syncLocalTracks(peerState.pc);
         }
     }, [clients, selfSocketId]);
@@ -491,6 +511,9 @@ export function useRoomAudio({ socket, roomId, selfSocketId, clients }: UseRoomA
                 .filter((client) => client.socketId !== selfSocketIdRef.current)
                 .map((client) => client.socketId)) {
                 const peerState = createPeer(peerId);
+                if (!peerState) {
+                    continue;
+                }
                 syncLocalTracks(peerState.pc);
             }
         } catch (error) {

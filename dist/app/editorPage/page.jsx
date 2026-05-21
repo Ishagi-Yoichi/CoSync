@@ -1,17 +1,20 @@
 "use client";
 import dynamic from 'next/dynamic';
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { IconAlertTriangle, IconLoader2, IconMicrophone, IconMicrophoneOff, IconRefresh, } from '@tabler/icons-react';
+import { IconAlertTriangle, IconCode, IconCopy, IconHeadphones, IconLoader2, IconMicrophone, IconMicrophoneOff, IconMinus, IconPlus, IconRefresh, IconSparkles, IconWaveSine, IconX, } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Client from '../../components/Client';
 import { initSocket } from '../../socket';
+import { EDITOR_LANGUAGE_OPTIONS } from '../../lib/editor-options';
 import { useRoomAudio } from '../../lib/useRoomAudio';
 const { ACTIONS } = require('../../Actions');
 const Editor = dynamic(() => import("../../components/Editor"), {
     ssr: false,
 });
 const ROOM_SESSION_KEY = 'cosync-room-session';
+const MIN_ZOOM = 80;
+const MAX_ZOOM = 150;
 const wait = (durationMs) => new Promise((resolve) => {
     window.setTimeout(resolve, durationMs);
 });
@@ -24,7 +27,7 @@ const getStatusCopy = (status, editorReady) => {
         case 'reconnecting':
             return 'Recovering the room connection...';
         case 'ready':
-            return editorReady ? 'Room is stable.' : 'Preparing the editor...';
+            return editorReady ? 'Room is stable and ready for work.' : 'Preparing the workspace surface...';
         case 'error':
             return 'The room needs attention before it can continue.';
         default:
@@ -32,7 +35,7 @@ const getStatusCopy = (status, editorReady) => {
     }
 };
 const EditorPageContent = () => {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const router = useRouter();
     const searchParams = useSearchParams();
     const roomId = (_a = searchParams.get('roomId')) !== null && _a !== void 0 ? _a : '';
@@ -44,6 +47,9 @@ const EditorPageContent = () => {
     const [clients, setClients] = useState([]);
     const [selfSocketId, setSelfSocketId] = useState('');
     const [initialCode, setInitialCode] = useState('');
+    const [currentCode, setCurrentCode] = useState('');
+    const [language, setLanguage] = useState('javascript');
+    const [zoomLevel, setZoomLevel] = useState(100);
     const [isConnected, setIsConnected] = useState(false);
     const [roomStatus, setRoomStatus] = useState('booting');
     const [roomError, setRoomError] = useState(null);
@@ -127,6 +133,7 @@ const EditorPageContent = () => {
                 setClients(response.clients);
                 const latestCode = (_b = (_a = response.code) !== null && _a !== void 0 ? _a : codeRef.current) !== null && _b !== void 0 ? _b : '';
                 codeRef.current = latestCode;
+                setCurrentCode(latestCode);
                 setInitialCode(latestCode);
                 setRoomStatus('ready');
                 setRoomError(null);
@@ -241,106 +248,232 @@ const EditorPageContent = () => {
         setRoomStatus('reconnecting');
         (_a = socketRef.current) === null || _a === void 0 ? void 0 : _a.connect();
     }
+    function changeZoom(direction) {
+        setZoomLevel((currentZoom) => {
+            if (direction === 'in') {
+                return Math.min(MAX_ZOOM, currentZoom + 10);
+            }
+            return Math.max(MIN_ZOOM, currentZoom - 10);
+        });
+    }
+    const activeVoiceUsers = clients.filter((client) => client.isAudioEnabled).length;
+    const speakingUsers = clients.filter((client) => client.isSpeaking).length;
+    const lineCount = currentCode ? currentCode.split('\n').length : 1;
+    const characterCount = currentCode.length;
+    const statusCopy = getStatusCopy(roomStatus, editorReady);
+    const collaboratorLabel = useMemo(() => {
+        if (clients.length <= 1) {
+            return 'Solo room';
+        }
+        return `${clients.length} people live`;
+    }, [clients.length]);
     if (!roomId || !username) {
         return <EditorPageLoading />;
     }
-    const activeVoiceUsers = clients.filter((client) => client.isAudioEnabled).length;
-    const statusCopy = getStatusCopy(roomStatus, editorReady);
-    return (<div className="flex h-screen bg-gray-900">
-            <div className="w-72 border-r border-gray-700 bg-gray-800 p-5">
-                <div className="flex h-full flex-col">
-                    <div className="mb-5 text-center">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-blue-600">
-                            <span className="text-2xl font-bold text-white">Co</span>
-                        </div>
-                    </div>
-
-                    <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-white">Room Status</h3>
-                        <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}/>
-                    </div>
-
-                    <div className="mb-4 rounded-lg border border-gray-700 bg-gray-900/70 p-3 text-xs text-gray-300">
-                        <div className="mb-1">Room: {roomId}</div>
-                        <div className="mb-1">Members: {clients.length}</div>
-                        <div>Voice ready: {activeVoiceUsers}</div>
-                    </div>
-
-                    <div className={`mb-4 rounded-lg border p-3 text-sm ${roomStatus === 'error'
-            ? 'border-red-500/40 bg-red-500/10 text-red-100'
-            : 'border-blue-500/30 bg-blue-500/10 text-blue-100'}`}>
-                        <div className="flex items-start gap-2">
-                            {roomStatus === 'error' ? (<IconAlertTriangle className="mt-0.5 h-4 w-4 shrink-0"/>) : (<IconLoader2 className={`mt-0.5 h-4 w-4 shrink-0 ${roomStatus === 'ready' && editorReady ? '' : 'animate-spin'}`}/>)}
+    return (<div className="premium-shell h-screen overflow-hidden p-3 md:p-4">
+            <div className="grid h-full gap-3 xl:grid-cols-[320px_minmax(0,1fr)]">
+                <aside className="premium-panel-strong flex min-h-0 flex-col rounded-[30px] p-4 md:p-5">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#67e8c8,#f6b365)] text-sm font-extrabold text-slate-950">
+                                Co
+                            </div>
                             <div>
-                                <div className="font-medium">{statusCopy}</div>
-                                {roomError ? <div className="mt-1 text-xs text-gray-300">{roomError}</div> : null}
-                                {audioError ? <div className="mt-1 text-xs text-amber-200">{audioError}</div> : null}
+                                <div className="text-[1.02rem] font-semibold tracking-[-0.045em] text-white">CoSync Room</div>
+                                <div className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{collaboratorLabel}</div>
+                            </div>
+                        </div>
+                        <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.6)]' : 'bg-rose-400'}`}/>
+                    </div>
+
+                    <div className="mt-5 rounded-[26px] border border-white/10 bg-white/[0.04] p-4">
+                        <div className="flex items-center justify-between text-[0.68rem] uppercase tracking-[0.16em] text-slate-400">
+                            <span>Room Health</span>
+                            <span>{roomStatus === 'ready' ? 'Live' : 'Syncing'}</span>
+                        </div>
+                        <div className="mt-3 text-[1.05rem] font-semibold tracking-[-0.035em] text-white">{roomId}</div>
+                        <div className="mt-3 text-[0.93rem] leading-6 text-slate-300">{statusCopy}</div>
+                        {roomError ? (<div className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-300/20 bg-rose-400/8 px-3 py-3 text-sm text-rose-200">
+                                <IconAlertTriangle className="mt-0.5 h-4 w-4 shrink-0"/>
+                                <span>{roomError}</span>
+                            </div>) : null}
+                        {audioError ? (<div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-300/20 bg-amber-300/8 px-3 py-3 text-sm text-amber-100">
+                                <IconHeadphones className="mt-0.5 h-4 w-4 shrink-0"/>
+                                <span>{audioError}</span>
+                            </div>) : null}
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                        <div className="premium-stat">
+                            <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Voice Ready</div>
+                            <div className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{activeVoiceUsers}</div>
+                        </div>
+                        <div className="premium-stat">
+                            <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Speaking</div>
+                            <div className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{speakingUsers}</div>
+                        </div>
+                        <div className="premium-stat">
+                            <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Language</div>
+                            <div className="mt-2 text-[1rem] font-semibold tracking-[-0.03em] text-white">
+                                {(_c = EDITOR_LANGUAGE_OPTIONS.find((option) => option.value === language)) === null || _c === void 0 ? void 0 : _c.label}
                             </div>
                         </div>
                     </div>
 
-                    <div className="mb-4 grid grid-cols-1 gap-3">
-                        {!isVoiceEnabled ? (<button className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-600" disabled={!isVoiceSupported || isMicBusy || roomStatus !== 'ready'} onClick={enableVoice}>
-                                <IconMicrophone className="h-4 w-4"/>
-                                {isMicBusy ? 'Starting Voice...' : 'Enable Voice'}
-                            </button>) : (<button className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold text-white transition-colors ${isMuted
-                ? 'bg-yellow-600 hover:bg-yellow-700'
-                : 'bg-sky-600 hover:bg-sky-700'}`} onClick={toggleMute}>
-                                {isMuted ? (<>
-                                        <IconMicrophone className="h-4 w-4"/>
-                                        Unmute Mic
-                                    </>) : (<>
-                                        <IconMicrophoneOff className="h-4 w-4"/>
-                                        Mute Mic
-                                    </>)}
-                            </button>)}
+                    <div className="mt-5 rounded-[26px] border border-white/10 bg-white/[0.035] p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                            <IconWaveSine className="h-4 w-4 text-[#67e8c8]"/>
+                            Voice Controls
+                        </div>
+                        <div className="mt-4 grid gap-3">
+                            {!isVoiceEnabled ? (<button className="premium-button premium-button-primary inline-flex items-center justify-center gap-2" disabled={!isVoiceSupported || isMicBusy || roomStatus !== 'ready'} onClick={enableVoice}>
+                                    <IconMicrophone className="h-4 w-4"/>
+                                    {isMicBusy ? 'Starting Voice...' : 'Enable Voice'}
+                                </button>) : (<button className={`premium-button inline-flex items-center justify-center gap-2 ${isMuted ? 'premium-button-warm' : 'premium-button-primary'}`} onClick={toggleMute}>
+                                    {isMuted ? (<>
+                                            <IconMicrophone className="h-4 w-4"/>
+                                            Unmute Mic
+                                        </>) : (<>
+                                            <IconMicrophoneOff className="h-4 w-4"/>
+                                            Mute Mic
+                                        </>)}
+                                </button>)}
 
-                        {!isConnected || roomStatus === 'error' ? (<button className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-yellow-700" onClick={reconnect}>
-                                <IconRefresh className="h-4 w-4"/>
-                                Reconnect
-                            </button>) : null}
+                            {!isConnected || roomStatus === 'error' ? (<button className="premium-button premium-button-secondary inline-flex items-center justify-center gap-2" onClick={reconnect}>
+                                    <IconRefresh className="h-4 w-4"/>
+                                    Reconnect
+                                </button>) : null}
+                        </div>
                     </div>
 
-                    <div className="mb-4 text-xs text-gray-400">
-                        Voice uses direct WebRTC peer links with Socket.IO signaling and automatic room recovery.
+                    <div className="mt-5 min-h-0 flex-1">
+                        <div className="mb-3 flex items-center justify-between">
+                            <div className="text-[0.95rem] font-semibold tracking-[-0.02em] text-white">Room Members</div>
+                            <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">{clients.length} active</div>
+                        </div>
+                        <div className="h-full space-y-3 overflow-y-auto pr-1">
+                            {clients.map((client) => (<Client key={client.socketId} username={client.username} isAudioEnabled={client.isAudioEnabled} isMuted={client.isMuted} isSpeaking={client.isSpeaking} isSelf={client.socketId === selfSocketId}/>))}
+                        </div>
                     </div>
 
-                    <div className="flex-1 space-y-2 overflow-y-auto">
-                        {clients.map((client) => (<Client key={client.socketId} username={client.username} isAudioEnabled={client.isAudioEnabled} isMuted={client.isMuted} isSpeaking={client.isSpeaking} isSelf={client.socketId === selfSocketId}/>))}
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                        <button className="premium-button premium-button-secondary inline-flex items-center justify-center gap-2" onClick={copyRoomId}>
+                            <IconCopy className="h-4 w-4"/>
+                            Copy Room ID
+                        </button>
+                        <button className="premium-button inline-flex items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#ff7b7b,#ffc4a4)] text-slate-950" onClick={leaveRoom}>
+                            <IconX className="h-4 w-4"/>
+                            Leave Room
+                        </button>
+                    </div>
+                </aside>
+
+                <section className="flex min-h-0 flex-col gap-3">
+                    <div className="premium-panel-strong rounded-[30px] p-4 md:p-5">
+                        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                            <div>
+                                <div className="premium-kicker">Collaboration Workspace</div>
+                                <div className="mt-2 text-[2rem] font-semibold tracking-[-0.055em] text-white md:text-[2.25rem]">
+                                    Premium editor experience for {username}
+                                </div>
+                                <div className="mt-2 text-[0.94rem] leading-6 text-slate-300">
+                                    Shared editing, room voice, resilient recovery, and editor controls in one polished surface.
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3">
+                                    <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Characters</div>
+                                    <div className="mt-2 text-[1.55rem] font-semibold tracking-[-0.045em] text-white">{characterCount}</div>
+                                </div>
+                                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3">
+                                    <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Lines</div>
+                                    <div className="mt-2 text-[1.55rem] font-semibold tracking-[-0.045em] text-white">{lineCount}</div>
+                                </div>
+                                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3">
+                                    <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">Zoom</div>
+                                    <div className="mt-2 text-[1.55rem] font-semibold tracking-[-0.045em] text-white">{zoomLevel}%</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button className="mb-3 mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700" onClick={copyRoomId}>
-                        Copy ROOM ID
-                    </button>
-                    <button className="w-full rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-red-700" onClick={leaveRoom}>
-                        Leave
-                    </button>
-                </div>
-            </div>
+                    <div className="premium-panel-strong flex min-h-0 flex-1 flex-col rounded-[30px] p-3 md:p-4">
+                        <div className="mb-3 flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.035] p-3 md:flex-row md:items-center md:justify-between">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200">
+                                    <IconCode className="h-4 w-4 text-[#67e8c8]"/>
+                                    Room Workspace
+                                </div>
+                                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200">
+                                    <IconSparkles className="h-4 w-4 text-[#f6b365]"/>
+                                    {isVoiceEnabled ? 'Voice live' : 'Voice optional'}
+                                </div>
+                            </div>
 
-            <div className="relative flex-1">
-                <div className={`h-full ${roomStatus === 'ready' && editorReady ? 'opacity-100' : 'opacity-50'}`}>
-                    <Editor socket={socket} roomId={roomId} initialCode={initialCode} onCodeChange={(code) => {
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                                <div className="min-w-[170px]">
+                                    <select className="premium-select h-[46px]" value={language} onChange={(event) => setLanguage(event.target.value)}>
+                                        {EDITOR_LANGUAGE_OPTIONS.map((option) => (<option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>))}
+                                    </select>
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-full border border-white/10 bg-white/5 px-2 py-2 md:justify-start">
+                                    <button className="flex h-10 w-10 items-center justify-center rounded-full text-slate-200 transition-colors hover:bg-white/10" onClick={() => changeZoom('out')} disabled={zoomLevel <= MIN_ZOOM}>
+                                        <IconMinus className="h-4 w-4"/>
+                                    </button>
+                                    <div className="min-w-[64px] text-center text-sm font-semibold text-white">{zoomLevel}%</div>
+                                    <button className="flex h-10 w-10 items-center justify-center rounded-full text-slate-200 transition-colors hover:bg-white/10" onClick={() => changeZoom('in')} disabled={zoomLevel >= MAX_ZOOM}>
+                                        <IconPlus className="h-4 w-4"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="relative min-h-0 flex-1 overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(8,15,26,0.96),rgba(6,12,22,0.98))] p-2">
+                            <div className={`h-full transition-opacity ${roomStatus === 'ready' && editorReady ? 'opacity-100' : 'opacity-35'}`}>
+                                <Editor socket={socket} roomId={roomId} initialCode={initialCode} language={language} zoomLevel={zoomLevel} onCodeChange={(code) => {
             codeRef.current = code;
+            setCurrentCode(code);
         }} onReady={() => setEditorReady(true)}/>
-                </div>
-
-                {roomStatus !== 'ready' || !editorReady ? (<div className="absolute inset-0 flex items-center justify-center bg-gray-950/45">
-                        <div className="rounded-xl border border-gray-700 bg-gray-900/95 px-6 py-5 text-center text-white shadow-xl">
-                            <div className="mb-2 flex justify-center">
-                                <IconLoader2 className="h-6 w-6 animate-spin text-blue-300"/>
                             </div>
-                            <div className="font-medium">{statusCopy}</div>
-                            <div className="mt-1 text-sm text-gray-300">
-                                We are waiting for a confirmed room state before opening the editor.
+
+                            {roomStatus !== 'ready' || !editorReady ? (<div className="absolute inset-0 flex items-center justify-center bg-[#07111c]/72">
+                                    <div className="rounded-[28px] border border-white/10 bg-[rgba(8,14,24,0.94)] px-8 py-6 text-center text-white shadow-[0_30px_80px_rgba(0,0,0,0.32)]">
+                                        <div className="mb-3 flex justify-center">
+                                            <IconLoader2 className="h-6 w-6 animate-spin text-[#67e8c8]"/>
+                                        </div>
+                                        <div className="text-lg font-semibold tracking-[-0.03em]">{statusCopy}</div>
+                                        <div className="mt-2 text-sm text-slate-300">
+                                            We wait for a confirmed room state before opening the editor canvas.
+                                        </div>
+                                    </div>
+                                </div>) : null}
+                        </div>
+
+                        <div className="mt-3 flex flex-col gap-2 rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300 md:flex-row md:items-center md:justify-between">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <span>Language: {(_d = EDITOR_LANGUAGE_OPTIONS.find((option) => option.value === language)) === null || _d === void 0 ? void 0 : _d.label}</span>
+                                <span>Lines: {lineCount}</span>
+                                <span>Characters: {characterCount}</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <span>{activeVoiceUsers} voice-ready</span>
+                                <span>{speakingUsers} speaking</span>
+                                <span>{isConnected ? 'Connected' : 'Offline'}</span>
                             </div>
                         </div>
-                    </div>) : null}
+                    </div>
+                </section>
             </div>
         </div>);
 };
-const EditorPageLoading = () => (<div className="flex h-screen items-center justify-center bg-gray-900">
-        <div className="text-xl text-white">Loading editor...</div>
+const EditorPageLoading = () => (<div className="premium-shell flex h-screen items-center justify-center bg-[#07111c]">
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] px-6 py-5 text-lg font-medium text-white">
+            Loading workspace...
+        </div>
     </div>);
 const EditorPage = () => {
     return (<Suspense fallback={<EditorPageLoading />}>
